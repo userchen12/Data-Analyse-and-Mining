@@ -1,0 +1,3323 @@
+<center>
+<font size=20>数据分析学习大纲</font>
+</center>
+
+
+# Data Clean
+
+## data integrity
+
+the accuracy, completeness, consistency, and trustworthiness of data 
+
+
+
+
+
+
+
+
+
+# Making predictions / Categorize things
+
+
+
+### [数据挖掘](./数据挖掘/数据挖掘理论与数学基础/python数据分析与挖掘实战.xmind)
+
+### 模型与选择
+
+#### 基础模型
+
+##### 1.线性回归 Linear Regression：
+
+专门用来预测一个具体的数字，比如房价
+
+最简单的线性回归，英文名：linear regression，用一条线（根据数据有多少列递增）去找适应整个数据集，可以看下面一个图来理解一下，可以调整的参数暂无，实际可以调整的参数一般都不建议调整。
+
+```
+线性回归加上L1正则化，英文名：lasso regression，和最简单的线性回归很像，唯一的不同是加上了L1正则化，这个看起来很复杂，实际上就是为了简化模型，让模型能够在测试中获得更高的正确率。L1的特点是，会剔除掉不相关的变量，比如说预测房价和你的身高没啥关系，如果你在数据里有身高这一项，L1大概率会让身高对于房价的影响降为0。可以调整的参数：
+
+alpha：L1的强度，可以设定为从0到正无穷，数字越大，正则化力度越强，越无关的变量就会越变0
+
+线性回归加上L2正则化，岭回归，英文名：ridge regression，和L1回归很像，唯一的不同是换成了L2正则化，实际上也是为了简化模型，让模型能够在测试中获得更高的正确率。L2的特点是，会降低不相关的变量的影响，但不会成为0，比如说预测房价和你的身高没啥关系，如果你在数据里有身高这一项，L2大概率会让身高对于房价的影响接近0，但不会成为0。可以调整的参数：
+
+alpha：L2的强度，可以设定为从0到正无穷，数字越大，正则化力度越强，越无关的变量就会越变0
+```
+
+
+
+不同线性回归比较，这里可以看到怎么用一条线去适应数据集
+
+##### 2.逻辑回归 Logistic Regression
+
+类似线性回归，但是这个是用来专门做分类的，比如通过各种数据判断一个交易是不是虚假的（虚假或不虚假两类）。可以调整的参数：
+
+```
+penalty：也就是正则化选择，可选择{'l1', 'l2', None, 'elasticnet' }。默认是l2。l1是L1正则化，l2是L2正则化（上面的线性回归部分都有详细的解释），None是没有正则化，elasticnet是L1和L2都有
+
+C：这个是正则化的倒数，默认是1，注意这里和线性回归有区别，这个数字小，正则化越强，越大越弱
+
+l1_ratio：这个不需要加，如果你上面的penality选择的不是elasticnet，如果你加的话，这个数字代表你l1和l2的比重
+```
+
+
+
+##### 3.支持向量机 SVM：Support Vector Machine
+
+可以理解为一个优化的线性回归，可以看一下下面的图来理解一下。可以调整的参数：
+
+```
+C：这个是正则化的倒数，默认是1，注意这里和线性回归有区别，这个数字小，正则化越强，越大越弱
+
+kernel：默认是rbf，可选择的是{‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’}。这个比较进阶，可以理解为一种让模型能够适应更复杂的数据，如果只想线性的话可以考虑选择linear
+```
+
+
+
+![img](https://i0.hdslb.com/bfs/article/e359943d309a7dee2c6c7c5c04a4649c0b85920f.png@842w_384h_progressive.webp)
+
+
+SVM对比线性回归，可以看到SVM给出了最优的线
+
+##### 4.随机森林 random forest
+
+可以把这个理解为另一种分类的办法，下图可以看一下。随机树的优点就是快而且自带正则化效果。可以调整的参数：
+
+```
+n_estimators：你想要多少棵树，默认100，一般而言越大越正则化
+
+criterion：这个比较进阶，可以随便选一个，默认gini。可以选择{“gini”, “entropy”, “log_loss”}
+
+min_samples_split: 这个比较进阶，默认2，最少有多少个数据点才能分出新的叶子，可以按照正确情况来调整
+
+min_samples_leaf: 这个比较进阶，默认1，每一个末端叶子最少有多少个数据点，按照正确情况来调整
+```
+
+随机森林，可以看到随机生成多个树，然后投票
+
+
+
+#### 特征工程
+
+##### 自动特征工程：
+
+[OpenFE](https://github.com/IIIS-Li-Group/OpenFE)
+
+```python
+pip install openfe
+from openfe import OpenFE, transform
+
+ofe = OpenFE()
+features = ofe.fit(data=train_x, label=train_y, n_jobs=n_jobs)  # generate new features
+train_x, test_x = transform(train_x, test_x, features, n_jobs=n_jobs) # transform the train and test data according to generated features.
+```
+
+
+
+参考书籍：
+
+[Feature Engineering for Machine Learning](https://github.com/apachecn/fe4ml-zh)
+
+
+
+
+
+##### **缺失值处理**：
+
+**Numerical Features**
+
+正常分布：mean， skewed分布：median
+
+**Category Features**
+
+Majority Imputation
+
+**Supervised  learning imputation**
+
+Regression/Classification
+
+**XGBoost/LightGBM**
+
+自动处理缺失值，无需对缺失值进行处理
+
+##### 数值特征：
+
+###### 装箱
+
+**固定宽度**：对于固定宽度装箱, 每个 bin 都包含一个特定的数值范围。范围可以是定制设计或自动分割, 它们可以线性缩放或指数缩放。例如, 我们可以将一个人的年龄分组为十年: 0-9 岁归纳到bin 1, 10-19 年归纳到 bin 2 等。要从计数映射到 bin, 只需除以 bin 的宽度并取整部分。
+
+```python
+>>> import numpy as np
+### Generate 20 random integers uniformly between 0 and 99
+>>> small_counts = np.random.randint(0, 100, 20)
+>>> small_counts
+array([30, 64, 49, 26, 69, 23, 56, 7, 69, 67, 87, 14, 67, 33, 88, 77, 75, 47, 44, 93])
+### Map to evenly spaced bins 0-9 by division
+>>> np.floor_divide(small_counts, 10)
+array([3, 6, 4, 2, 6, 2, 5, 0, 6, 6, 8, 1, 6, 3, 8, 7, 7, 4, 4, 9], dtype=int32)
+### An array of counts that span several magnitudes
+>>> large_counts = [296, 8286, 64011, 80, 3, 725, 867, 2215, 7689, 11495, 91897, 44, 28, 7971, 926, 122, 22222]
+### Map to exponential-width bins via the log function
+>>> np.floor(np.log10(large_counts))
+array([ 2., 3., 4., 1., 0., 2., 2., 3., 3., 4., 4., 1., 1., 3., 2., 2., 4.])
+```
+
+**分位数装箱** ：数值差距大，固定宽度很多箱位无数据,
+
+```python
+>>> deciles = biz_df['review_count'].quantile([.1, .2, .3, .4, .5, .6, .7, .8, .9])
+>>> deciles
+0.1 3.0
+0.2 4.0
+0.3 5.0
+0.4 6.0
+0.5 8.0
+0.6 12.0
+0.7 17.0
+0.8 28.0
+0.9 58.0
+Name: review_count, dtype: float64
+### Visualize the deciles on the histogram
+>>> sns.set_style('whitegrid')
+>>> fig, ax = plt.subplots()
+>>> biz_df['review_count'].hist(ax=ax, bins=100)
+>>> for pos in deciles:
+...     handle = plt.axvline(pos, color='r')
+>>> ax.legend([handle], ['deciles'], fontsize=14)
+>>> ax.set_yscale('log')
+>>> ax.set_xscale('log')
+>>> ax.tick_params(labelsize=14)
+>>> ax.set_xlabel('Review Count', fontsize=14)
+>>> ax.set_ylabel('Occurrence', fontsize=14)
+```
+
+```python
+### Continue example Example 2-3 with large_counts
+>>> import pandas as pd
+### Map the counts to quartiles
+>>> pd.qcut(large_counts, 4, labels=False)
+array([1, 2, 3, 0, 0, 1, 1, 2, 2, 3, 3, 0, 0, 2, 1, 0, 3], dtype=int64)
+### Compute the quantiles themselves
+>>> large_counts_series = pd.Series(large_counts)
+>>> large_counts_series.quantile([0.25, 0.5, 0.75])
+0.25 122.0
+0.50 926.0
+0.75 8286.0
+dtype: float64
+```
+
+###### Box-Cox变换
+
+$$
+\tilde{x}= \begin{cases}\frac{x^2-1}{\lambda} & \text { if } \lambda \neq 0, \\ \ln (x) & \text { if } \lambda=0\end{cases}
+$$
+
+只有当数据为正值时, Box-Cox 公式才能工作。对于非正数据, 可以通过加上固定常量来移动数值。当应用 Box-Cox 变换或更一般的功率变换时, 我们必须确定参数 λ 的值。这可能是通过最大似然(找到的λ,使产生的变换信号的高斯似然最大) 或贝叶斯方法。完全介绍 Box-Cox 和一般功率变换的使用超出了本书的范围。感兴趣的读者可以通过 Jack Johnston 和John DiNardo (McGraw Hill) 编写的Econometric Methods 找到更多关于幂转换的信息。幸运的是, Scipy 的数据包包含了一个 Box-Cox 转换的实现, 其中包括查找最佳变换参数。
+
+```python
+>>> from scipy import stats
+
+# Continuing from the previous example, assume biz_df contains
+# the Yelp business reviews data
+# Box-Cox transform assumes that input data is positive.
+# Check the min to make sure.
+>>> biz_df['review_count'].min()
+3
+
+# Setting input parameter lmbda to 0 gives us the log transform (without constant offset)
+>>> rc_log = stats.boxcox(biz_df['review_count'], lmbda=0)
+# By default, the scipy implementation of Box-Cox transform finds the lmbda parameter
+# that will make the output the closest to a normal distribution
+>>> rc_bc, bc_params = stats.boxcox(biz_df['review_count'])
+>>> bc_params
+-0.4106510862321085
+```
+
+
+
+###### 特征缩放或归一化
+
+如果你的模型对输入特征的数值范围敏感, 则特征缩放可能会有所帮助。顾名思义, 特征缩放会更改特征值的数值范围。有时人们也称它为特征规范化。功能缩放通常分别针对单个特征进行。有几种常见的缩放操作, 每个类型都产生不同的特征值分布。
+
+**Rescalling**:模型对输入特征的数值范围敏感，例如KNN, K-means, SVM等, 则特征缩放可能会有所帮助,而且可以防止某个特征影响权重过高，提高梯度下降的速度，可以提升某些模型的效果，
+
+通常做法有：Min-max缩放（$\frac{x-min}{max}$）, 标准化(StandardScaler(x))
+
+**Normalization**：当特征分布是skewed：“symmetry broken",通常做法有：sqrt(x+n), log(x+n), exp(x), power(x), box-cox(x) ,L2 normalization
+
+```python
+>>> import pandas as pd
+>>> import sklearn.preprocessing as preproc
+
+# Load the online news popularity dataset
+>>> df = pd.read_csv('OnlineNewsPopularity.csv', delimiter=', ')
+
+# Look at the original data - the number of words in an article
+>>> df['n_tokens_content'].as_matrix()
+array([ 219., 255., 211., ..., 442., 682., 157.])
+
+# Min-max scaling
+>>> df['minmax'] = preproc.minmax_scale(df[['n_tokens_content']])
+>>> df['minmax'].as_matrix()
+array([ 0.02584376, 0.03009205, 0.02489969, ..., 0.05215955, 
+        0.08048147, 0.01852726])
+
+# Standardization - note that by definition, some outputs will be negative
+>>> df['standardized'] = preproc.StandardScaler().fit_transform(df[['n_tokens_content']])
+>>> df['standardized'].as_matrix()
+array([-0.69521045, -0.61879381, -0.71219192, ..., -0.2218518 ,
+        0.28759248, -0.82681689])
+
+# L2-normalization
+>>> df['l2_normalized'] = preproc.normalize(df[['n_tokens_content']], axis=0)
+>>> df['l2_normalized'].as_matrix()
+array([ 0.00152439, 0.00177498, 0.00146871, ..., 0.00307663,
+        0.0047472 , 0.00109283])
+```
+
+
+
+##### 注意：
+
+**不要中心化稀疏数据**
+
+最小最大缩放和标准化都从原始特征值中减去一个数量。对于最小最大缩放, 移动量是当前特征的所有值中最小的。对于标准化, 移动的量是平均值。如果移动量不是零, 则这两种转换可以将稀疏特征（大部分值为零）的向量转换为一个稠密的向量。这反过来会给分类器带来巨大的计算负担, 取决于它是如何实现的。词袋是一种稀疏表示, 大多数分类库都对稀疏输入进行优化。如果现在的表示形式包含了文档中没有出现的每个单词, 那就太可怕了。请谨慎对稀疏特征执行最小最大缩放和标准化操作。
+
+##### 文本特征
+
+###### 词袋
+
+```python
+>>> import pandas 
+>>> import json 
+>>> from sklearn.feature_extraction.text import CountVectorizer 
+# Load the first 10,000 reviews 
+>>> f = open('data/yelp/v6/yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_review.json') 
+>>> js = [] 
+>>> for i in range(10000): 
+... js.append(json.loads(f.readline())) 
+>>> f.close() 
+>>> review_df = pd.DataFrame(js) 
+# Create feature transformers for unigram, bigram, and trigram. 
+# The default ignores single-character words, which is useful in practice because it trims 
+# uninformative words. But we explicitly include them in this example for illustration purposes. 
+>>> bow_converter = CountVectorizer(token_pattern='(?u)\\b\\w+\\b') 
+>>> bigram_converter = CountVectorizer(ngram_range=(2,2), token_pattern='(?u)\\b\\w+\\b') 
+>>> trigram_converter = CountVectorizer(ngram_range=(3,3), token_pattern='(?u)\\b\\w+\\b') 
+# Fit the transformers and look at vocabulary size 
+>>> bow_converter.fit(review_df['text']) 
+>>> words = bow_converter.get_feature_names() 
+>>> bigram_converter.fit(review_df['text']) 
+>>> bigram = bigram_converter.get_feature_names() 
+>>> trigram_converter.fit(review_df['text']) 
+>>> trigram = trigram_converter.get_feature_names() 
+>>> print (len(words), len(bigram), len(trigram)) 
+26047 346301 847545 
+
+```
+
+![图3-6](https://github.com/apachecn/fe4ml-zh/raw/master/images/chapter3/3-6.PNG)
+
+
+
+###### 分块（Chunking）和词性标注（part-of-Speech Tagging）
+
+分块比 n-gram 要复杂一点，因为它基于词性，基于规则的模型形成了记号序列。
+
+例如，我们可能最感兴趣的是在问题中找到所有名词短语，其中文本的实体，主题最为有趣。 为了找到这个，我们使用词性标记每个作品，然后检查该标记的邻域以查找词性分组或“块”。 定义单词到词类的模型通常是语言特定的。 几种开源 Python 库（如 NLTK，Spacy 和 TextBlob）具有多种语言模型。
+
+```python
+>>> import pandas as pd 
+>>> import json 
+# Load the first 10 reviews 
+>>> f = open('data/yelp/v6/yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_review.json') 
+>>> js = [] 
+>>> for i in range(10): 
+js.append(json.loads(f.readline())) 
+>>> f.close() 
+>>> review_df = pd.DataFrame(js) 
+## First we'll walk through spaCy's functions 
+>>> import spacy 
+# preload the language model 
+>>> nlp = spacy.load('en') 
+# We can create a Pandas Series of spaCy nlp variables 
+>>> doc_df = review_df['text'].apply(nlp) 
+# spaCy gives you fine grained parts of speech using: (.pos_) 
+# and coarse grained parts of speech using: (.tag_) 
+>>> for doc in doc_df[4]: 
+print([doc.text, doc.pos_, doc.tag_]) 
+# spaCy also does some basic noun chunking for us 
+>>> print([chunk for chunk in doc_df[4].noun_chunks]) 
+[a letter, the mail, Dr. Goldberg, Arizona, a new position, June, He, I, a new doctor, NYC, you, a date] 
+##### 
+## We can do the same feature transformations using Textblob 
+>>> from textblob import TextBlob 
+# The default tagger in TextBlob uses the PatternTagger, which is fine for our example. 
+# You can also specify the NLTK tagger, which works better for incomplete sentences. 
+>>> blob_df = review_df['text'].apply(TextBlob) 
+>>> blob_df[4].tags 
+
+```
+
+
+
+##### 类别特征
+
+当某个category feature的值在train与test的数据集中的分布不一致时，需要取两者的交集进行encoding，比如train中有A、B、C，但test中有A、B、D，这时候两边数据都只取A、B，C、D是冗余特征
+
+**Label Encoding**
+
+具有等级的特征，值之间有大小关系
+
+###### One-Hot编码
+
+```python
+import pandas as pd
+from sklearn import linear_model
+df = pd.DataFrame({'City': ['SF', 'SF', 'SF', 'NYC', 'NYC', 'NYC','Seattle', 'Seattle', 'Seattle'],
+				   'Rent': [3999, 4000, 4001, 3499, 3500, 3501, 2499,2500,2501]})
+>>> df['Rent'].mean()
+3333.3333333333335
+
+one_hot_df = pd.get_dummies(df, prefix=['city'])
+>>> one_hot_df
+   Rent  city_NYC  city_SF  city_Seattle
+0  3999         0        1             0
+1  4000         0        1             0
+2  4001         0        1             0
+3  3499         1        0             0
+4  3500         1        0             0
+5  3501         1        0             0
+6  2499         0        0             1
+7  2500         0        0             1
+8  2501         0        0             1
+
+model = linear_model.LinearRegression()
+model.fit(one_hot_df[['city_NYC', 'city_SF', 'city_Seattle']],
+	     one_hot_df[['Rent']])
+>>> model.coef_
+array([[ 166.66666667,  666.66666667, -833.33333333]])
+>>> model.intercept_
+array([ 3333.33333333])
+```
+
+
+
+###### 虚拟编码(dummy_code)
+
+```python
+dummy_df = pd.get_dummies(df, prefix=['city'], drop_first=True)
+
+>>> dummy_df
+   Rent  city_SF  city_Seattle
+0  3999        1             0
+1  4000        1             0
+2  4001        1             0
+3  3499        0             0
+4  3500        0             0
+5  3501        0             0
+6  2499        0             1
+7  2500        0             1
+8  2501        0             1
+
+>>> model.fit(dummy_df[['city_SF', 'city_Seattle']], dummy_df['Rent'])
+LinearRegression(copy_X=True, fit_intercept=True, n_jobs=1, normalize=False)
+>>> model.coef_
+array([  500., -1000.])
+>>> model.intercept_
+3500.0
+```
+
+###### Effect编码
+
+```python
+>>> effect_df = dummy_df.copy()
+>>> effect_df.ix[3:5, ['city_SF', 'city_Seattle']] = -1.0
+>>> effect_df
+   Rent  city_SF  city_Seattle
+0  3999      1.0           0.0
+1  4000      1.0           0.0
+2  4001      1.0           0.0
+3  3499     -1.0          -1.0
+4  3500     -1.0          -1.0
+5  3501     -1.0          -1.0
+6  2499      0.0           1.0
+7  2500      0.0           1.0
+8  2501      0.0           1.0
+>>> model.fit(effect_df[['city_SF', 'city_Seattle']], effect_df['Rent'])
+LinearRegression(copy_X=True, fit_intercept=True, n_jobs=1, normalize=False)
+>>> model.coef_
+array([ 666.66666667, -833.33333333])
+>>> model.intercept_
+3333.3333333333335
+```
+
+**以上总结：**
+
+独热，虚拟和效果编码非常相似。 他们每个人都有优点和缺点。 独热编码是多余的，它允许多个有效模型一样的问题。 非唯一性有时候对解释有问题。该优点是每个特征都明显对应于一个类别。 此外，失踪数据可以编码为全零矢量，输出应该是整体目标变量的平均值。
+
+虚拟编码和效果编码不是多余的。 他们产生独特和可解释的模型。 虚拟编码的缺点是它不能轻易处理缺少数据，因为全零矢量已经映射到参考类别。它还编码每个类别相对于参考类别的影响，其中看起来很奇怪。 效果编码通过使用不同的代码来避免此问题参考类别。 但是，所有-1的矢量都是一个密集的矢量，对于存储和计算来说都很昂贵。 因此，Pandas和Scikit Learn等流行的ML软件包选择了虚拟编码或独热编码，而不是效应编码。当类别数量变得非常多时，所有三种编码技术都会失效大。 需要不同的策略来处理非常大的分类变量。
+
+**处理大量的类别特征**
+
+对于这种类别特征处理的方案有：
+
+1. 对编码不做任何事情。 使用便宜的训练简单模型。 在许多机器上将独热编码引入线性模型（逻辑回归或线性支持向量机）。
+2. 压缩编码，有两种方式 a. 对特征进行哈希--在线性回归中特别常见 b. bin-counting--在线性回归中与树模型都常见
+
+###### 特征哈希
+
+![img](https://github.com/apachecn/fe4ml-zh/raw/master/images/chapter5/5-2.jpg)
+
+
+
+```python
+import pandas as pd
+import json
+
+js = []
+with open('yelp_academic_dataset_review.json') as f:
+	for i in range(10000):
+		js.append(json.loads(f.readline()))
+
+review_df = pd.DataFrame(js)
+
+m = len(review_df.business_id.unique())
+
+>>>m
+4174
+
+In [4]: from sklearn.feature_extraction import FeatureHasher
+   ...: 
+   ...: h = FeatureHasher(n_features=m, input_type='string')
+   ...: 
+   ...: f = h.transform(review_df['business_id'])
+   ...: 
+
+In [5]: review_df['business_id'].unique().tolist()[0:5]
+Out[5]: 
+['9yKzy9PApeiPPOUJEtnvkg',
+ 'ZRJwVLyzEJq1VAihDhYiow',
+ '6oRAC4uyJCsJl1X0WZpVSA',
+ '_1QQZuf4zZOyFCvXc0o6Vg',
+ '6ozycU1RpktNG2-1BroVtw']
+
+
+In [6]: f.toarray()
+Out[6]: 
+array([[ 0.,  0.,  0., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ...,  0.,  0.,  0.],
+       ..., 
+       [ 0.,  0.,  0., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ...,  0.,  0.,  0.]])
+```
+
+
+
+###### **bin-counting**
+
+bin-counting的想法非常简单：不是使用分类变量作为特征，而是使用目标在该值下的条件概率。 换句话说，不是编码的身份分类值，而是计算该值和该值之间的关联统计量作为我们希望预测的目标。 对于那些熟悉Bayes分类器的人来说，这个统计学应该敲响一下钟，因为它是该类的条件概率假设所有功能都是独立的。
+
+example
+
+|       |                  |                      |                      |                    |                  |                      |                      |
+| ----- | ---------------- | -------------------- | -------------------- | ------------------ | ---------------- | -------------------- | -------------------- |
+| User  | Number of clicks | Number of non-clicks | probability of click | QueryHash,AdDomain | Number of clicks | Number of non-clicks | probability of click |
+| Alice | 5                | 120                  | 0.0400               | 0x598fd4fe,foo.com | 5000             | 30000                | 0.167                |
+| bob   | 20               | 230                  | 0.0800               | 0x50fa3cc0,bar.org | 100,900,0.100    |                      |                      |
+| ...   |                  |                      |                      |                    |                  |                      |                      |
+| joe   | 2                | 3                    | 0.400                | 0x437a45e1,qux.net | 6,18,0.250       |                      |                      |
+
+Bin-counting假定历史数据可用于计算统计。 表5-6包含分类变量每个可能值的汇总历史计数。 根据用户点击任何广告的次数以及未点击的次数，我们可以计算用户“Alice”点击任何广告的概率。 同样，我们可以计算任何查询 - 广告 - 域组合的点击概率。 在训练时，每当我们看到“爱丽丝”时，都使用她的点击概率作为模型的输入特征。 QueryHash-AdDomain对也是如此，例如“0x437a45e1，qux.net”。
+
+假设有10,000个用户。 独热编码会生成一个稀疏矢量长度为10,000，在列中对应于值的单个1当前数据点。 Bin-counting将所有10,000个二进制列编码为一个功能的真实值介于0和1之间。
+
+
+
+##### 非线性特征
+
+###### k 均值特征化
+
+当使用 k 均值作为特征化过程时，数据点可以由它的簇成员（分类变量群组成员的稀疏独热编码）来表示，我们现在来说明。
+
+如果目标变量也是可用的，那么我们可以选择将该信息作为对聚类过程的提示。一种合并目标信息的方法是简单地将目标变量作为 k 均值算法的附加输入特征。由于目标是最小化在所有输入维度上的总欧氏距离，所以聚类过程将试图平衡目标值和原始特征空间中的相似性。可以在聚类算法中对目标值进行缩放以获得更多或更少的关注。目标的较大差异将产生更多关注分类边界的聚类。
+
+聚类算法分析数据的空间分布。因此，k 均值特征化创建了一个压缩的空间索引，该数据可以在下一阶段被馈送到模型中。这是模型堆叠（stacking）的一个例子。
+
+```python
+import numpy as np 
+from sklearn.cluster import KMeans 
+ 
+class KMeansFeaturizer:     
+    """将数字型数据输入k-均值聚类.          
+    在输入数据上运行k-均值并且把每个数据点设定为它的簇id. 如果存在目标变量，则将其缩放并包含为k-均值的输入，以导出服从分类边界以及组相似点的簇。
+    """ 
+ 
+    def __init__(self, k=100, target_scale=5.0, random_state=None):         
+        self.k = k         
+        self.target_scale = target_scale         
+        self.random_state = random_state              
+        
+    def fit(self, X, y=None):         
+    """在输入数据上运行k-均值，并找到中心."""         
+        if y is None:             
+            # 没有目标变量运行k-均值             
+            km_model = KMeans(n_clusters=self.k,n_init=20,random_state=self.random_state)             
+            km_model.fit(X)
+            self.km_model_ = km_model             
+            self.cluster_centers_ = km_model.cluster_centers_             
+            return self 
+ 
+        # 有目标信息，使用合适的缩减并把输入数据输入k-均值 
+        data_with_target = np.hstack((X, y[:,np.newaxis]*self.target_scale)) 
+    
+        # 在数据和目标上简历预训练k-均值模型         
+        km_model_pretrain = KMeans(n_clusters=self.k,n_init=20,random_state=self.random_state)         
+        km_model_pretrain.fit(data_with_target) 
+    
+        #运行k-均值第二次获得簇在原始空间没有目标信息。使用预先训练中发现的质心进行初始化。
+        #通过一个迭代的集群分配和质心重新计算。       
+        km_model = KMeans(n_clusters=self.k,init=km_model_pretrain.cluster_centers_[:,:2],n_init=1,max_iter=1)         
+        km_model.fit(X)                  
+        self.km_model = km_model         
+        self.cluster_centers_ = km_model.cluster_centers_         
+        return self  
+
+    def transform(self, X, y=None):         
+    """为每个输入数据点输出最接近的簇id。"""           
+        clusters = self.km_model.predict(X)         
+        return clusters[:,np.newaxis]          
+        
+    def fit_transform(self, X, y=None):       
+        self.fit(X, y)         
+        return self.transform(X, y) 
+```
+
+```python
+from scipy.spatial import Voronoi, voronoi_plot_2d 
+from sklearn.datasets import make_moons 
+ 
+training_data, training_labels = make_moons(n_samples=2000, noise=0.2) 
+kmf_hint = KMeansFeaturizer(k=100, target_scale=10).fit(training_data, training_labels) 
+kmf_no_hint = KMeansFeaturizer(k=100, target_scale=0).fit(training_data, training_labels) 
+ 
+def kmeans_voronoi_plot(X, y, cluster_centers, ax):     
+    """绘制与数据叠加的k-均值聚类的Voronoi图""" 
+    ax.scatter(X[:, 0], X[:, 1], c=y, cmap='Set1', alpha=0.2)     
+    vor = Voronoi(cluster_centers)     
+    voronoi_plot_2d(vor, ax=ax, show_vertices=False, alpha=0.5) 
+```
+
+让我们测试 k 均值特征分类的有效性。例 7-5 对 k 均值簇特征增强的输入数据应用 Logistic 回归。比较了与使用径向基核的支持向量机（RBF SVM）、K 近邻（KNN）、随机森林（RF）和梯度提升树（GBT）的结果。随机森林和梯度提升树是最流行的非线性分类器，具有最先进的性能。RBF 支持向量机是欧氏空间的一种合理的非线性分类器。KNN 根据其 K 近邻的平均值对数据进行分类。（请参阅“分类器概述”来概述每个分类器。）
+
+分类器的默认输入数据是数据的 2D 坐标。Logistic 回归也给出了簇成员特征（在图 7-7 中标注为“k 均值的 LR”）。作为基线，我们也尝试在二维坐标（标记为“LR”）上进行逻辑回归。
+
+
+
+```python
+from sklearn.linear_model 
+import LogisticRegression 
+from sklearn.svm import SVC 
+from sklearn.neighbors import KNeighborsClassifier 
+from sklearn.ensemble import RandomForestClassifier,GradientBoostingClassifier 
+ 
+#生成与训练数据相同分布的测试数据 
+test_data, test_labels = make_moons(n_samples=2000, noise=0.3) 
+ 
+# 使用k-均值特技器生成簇特征
+training_cluster_features = kmf_hint.transform(training_data) 
+test_cluster_features = kmf_hint.transform(test_data) 
+ 
+# 将新的输入特征和聚类特征整合
+training_with_cluster = scipy.sparse.hstack((training_data, training_cluster_features)) test_with_cluster = scipy.sparse.hstack((test_data, test_cluster_features)) 
+ 
+# 建立分类器 
+lr_cluster = LogisticRegression(random_state=seed).fit(training_with_cluster, training_labels) 
+classifier_names = ['LR','kNN','RBF SVM','Random Forest','Boosted Trees'] 
+classifiers = [LogisticRegression(random_state=seed),KNeighborsClassifier(5),SVC(gamma=2, C=1),RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),GradientBoostingClassifier(n_estimators=10, learning_rate=1.0, max_depth=5)] 
+for model in classifiers:     
+    model.fit(training_data, training_labels) 
+ 
+# 辅助函数使用ROC评估分类器性能
+def test_roc(model, data, labels): 
+    if hasattr(model, "decision_function"):         
+        predictions = model.decision_function(data)     
+    else:         
+        predictions = model.predict_proba(data)[:,1]     
+        fpr, tpr, _ = sklearn.metrics.roc_curve(labels, predictions)     
+        return fpr, tpr 
+ 
+# 显示结果 
+import matplotlib.pyplot as plt plt.figure() 
+fpr_cluster, tpr_cluster = test_roc(lr_cluster, test_with_cluster, test_labels) plt.plot(fpr_cluster, tpr_cluster, 'r-', label='LR with k-means') 
+ 
+for i, model in enumerate(classifiers):     
+    fpr, tpr = test_roc(model, test_data, test_labels)     plt.plot(fpr, tpr, label=classifier_names[i])      
+    plt.plot([0, 1], [0, 1], 'k--') 
+    plt.legend() 
+```
+
+与独热簇相反，数据点也可以由其逆距离的密集向量表示到每个聚类中心。这比简单的二值化簇保留了更多的信息，但是现在表达是密集的。这里有一个折衷方案。一个热集群成员导致一个非常轻量级的稀疏表示，但是一个可能需要较大的`K`来表示复杂形状的数据。反向距离表示是密集的，这对于建模步骤可能花费更昂贵，但是这可以需要较小的`K`。
+
+稀疏和密集之间的折衷是只保留最接近的簇的`p`的逆距离。但是现在`P`是一个额外的超参数需要去调整。（现在你能理解为什么特征工程需要这么多的步骤吗？），天下没有免费的午餐。
+
+值得注意的是：
+
+k 均值特化对有实数、有界的数字特征是有用的，这些特征构成空间中密集区域的团块。团块可以是任何形状，因为我们可以增加簇的数量来近似它们。（与经典的类别聚类不同，我们不关心真正的簇数；我们只需要覆盖它们。）
+
+k 均值不能处理欧几里得距离没有意义的特征空间，也就是说，奇怪的分布式数字变量或类别变量。如果特征集包含这些变量，那么有几种处理它们的方法：
+
+1. 仅在实值的有界数字特征上应用 k 均值特征。
+2. 定义自定义度量（参见第？章以处理多个数据类型并使用 k 中心点算法。（k 中心点类似于 k 均值，但允许任意距离度量。）
+3. 类别变量可以转换为装箱统计（见“桶计数”），然后使用 K 均值进行特征化。
+
+结合处理分类变量和时间序列的技术，k 均值特化可以自适应的处理经常出现在客户营销和销售分析中的丰富数据。所得到的聚类可以被认为是用户段，这对于下一个建模步骤是非常有用的特征
+
+
+
+
+
+
+
+
+
+
+
+##### 交互特征
+
+```python
+### suppose the x2 is a feature list
+### Create pairwise interaction features, skipping the constant bias term
+>>> X2 = preproc.PolynomialFeatures(include_bias=False).fit_transform(X)
+
+### Create train/test sets for both feature sets
+>>> X1_train, X1_test, X2_train, X2_test, y_train, y_test = train_test_split(X, X2, y, test_size=0.3, random_state=123)
+
+>>> def evaluate_feature(X_train, X_test, y_train, y_test):
+...     '''Fit a linear regression model on the training set and score on the test set'''
+...     model = linear_model.LinearRegression().fit(X_train, y_train)
+...     r_score = model.score(X_test, y_test)
+...     return (model, r_score)
+
+### Train models and compare score on the two feature sets
+>>> (m1, r1) = evaluate_feature(X1_train, X1_test, y_train, y_test)
+>>> (m2, r2) = evaluate_feature(X2_train, X2_test, y_train, y_test)
+>>> print("R-squared score with singleton features: %0.5f" % r1)
+>>> print("R-squared score with pairwise features: %0.10f" % r2)
+R-squared score with singleton features: 0.00924
+R-squared score with pairwise features: 0.0113276523
+```
+
+![image-20230712205231705](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230712205231705.png)
+
+##### 特征选择
+
+[特征选择(Feature Selection)方法汇总](https://zhuanlan.zhihu.com/p/74198735)
+
+[shap: explain the output of any machine learning model](https://github.com/userchen12/shap)
+
+![image-20230712210749248](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230712210749248.png)
+
+粗略地说，特征选择技术分为三类。
+
+###### **Filtering（过滤**）: 
+
+预处理可以删除那些不太可能对模型有用的特征。例如，可以计算每个特征与响应变量之间的相关或相互信息，并筛除相关信息或相互信息低于阈值的特征。第3章讨论了文本特征的过滤技术的例子。过滤比下面的包装（wrapper）技术便宜得多，但是他们没有考虑到正在使用的模型。因此他们可能无法为模型选择正确的特征。最好先保守地进行预过滤，以免在进行模型训练步骤之前无意中消除有用的特征。
+
+example: PCA
+
+```python
+>>> from sklearn import datasets
+>>> from sklearn.decomposition import PCA
+
+# Load the data
+>>> digits_data = datasets.load_digits()
+>>> n = len(digits_data.images)
+
+# Each image is represented as an 8-by-8 array.
+# Flatten this array as input to PCA.
+>>> image_data = digits_data.images.reshape((n, -1))
+>>> image_data.shape(1797, 64)
+
+# Groundtruth label of the number appearing in each image
+>>> labels = digits_data.target
+>>> labels
+array([0, 1, 2, ..., 8, 9, 8])
+# Fit a PCA transformer to the dataset.
+# The number of components is automatically chosen to account for
+# at least 80% of the total variance.
+>>> pca_transformer = PCA(n_components=0.8)
+>>> pca_images = pca_transformer.fit_transform(image_data)
+>>> pca_transformer.explained_variance_ratio_
+array([ 0.14890594, 0.13618771, 0.11794594, 0.08409979, 0.05782415,
+        0.0491691 , 0.04315987, 0.03661373, 0.03353248, 0.03078806
+,
+        0.02372341, 0.02272697, 0.01821863])
+>>> pca_transformer.explained_variance_ratio_[:3].sum()
+0.40303958587675121
+
+# Visualize the results
+>>> import matplotlib.pyplot as plt
+>>> from mpl_toolkits.mplot3d import Axes3D
+>>> %matplotlib notebook
+>>> fig = plt.figure()
+>>> ax = fig.add_subplot(111, projection='3d')
+>>> for i in range(100):
+... ax.scatter(pca_images[i,0], pca_images[i,1], pca_images[i,2],
+... marker=r'![{}](../images/tex-99914b932bd37a50b983c5e7c90ae93b.gif)'.format(labels[i]), s=64)
+
+>>> ax.set_xlabel('Principal component 1')
+>>> ax.set_ylabel('Principal component 2')
+>>> ax.set_zlabel('Principal component 3')
+```
+
+
+
+###### **Wrapper methods（包装方法）**：
+
+这些技术是昂贵的，但它们允许您尝试特征子集，这意味着你不会意外删除自身无法提供信息但在组合使用时非常有用的特征。包装方法将模型视为提供特征子集质量分数的黑盒子。shi一个独立的方法迭代地改进子集。
+
+
+
+###### **Embedded methods（嵌入式方法）**：
+
+嵌入式方法执行特征选择作为模型训练过程的一部分。 例如，决策树固有地执行特征选择，因为它在每个训练步骤选择一个要在其上进行树分裂的特征。另一个例子是L1正则，它可以添加到任何线性模型的训练目标中。L1鼓励模型使用一些特征而不是许多特征。因此它也被称为模型的稀疏约束。嵌入式方法将特征选择作为模型训练过程的一部分。它们不如包装方法那么强大，但也远不如包装方法那么昂贵。与过滤相比，嵌入式方法会选择特定于模型的特征。从这个意义上讲，嵌入式方法在计算费用和结果质量之间取得平衡。
+
+特征选择的全面处理超出了本书的范围。有兴趣的读者可以参考 Isabelle Guyon 和 André Elisseeff 撰写的调查报告“变量和特征选择介绍”（“An Introduction to Variable and Feature Selection”）。
+
+#### 调参
+
+###### 自动调参
+
+[**hyperopt**](https://github.com/hyperopt/hyperopt)
+
+[**Bayesian Optimization**](https://github.com/bayesian-optimization/BayesianOptimization)
+
+
+
+[决策树、随机森林、LightGBM 和 XGBoost 的重要参数以及调整策略](https://zhuanlan.zhihu.com/p/418992334)
+
+###### Xgboost
+
+**调参顺序**
+
+![image-20230713100914013](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230713100914013.png)
+
+![image-20230713100928333](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230713100928333.png)
+
+![image-20230713101041568](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230713101041568.png)
+
+![image-20230713101119373](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230713101119373.png)
+
+#### 模型评价
+
+前提假设：
+真正例（TP）：实际上是正例的数据点被标记为正例
+假正例（FP）：实际上是反例的数据点被标记为正例
+真反例（TN）：实际上是反例的数据点被标记为反例
+假反例（FN）：实际上是正例的数据点被标记为反例
+
+##### 分类评估
+
+###### 二分类
+
+[混淆矩阵、准确率、召回率、F1值、ROC曲线的AUC值](https://zhuanlan.zhihu.com/p/356457537)
+
+精度-P=TP/(TP+FP)，模型所预测的所有样本中，预测正确的比例
+召回率-R=TP/(TP+FN)，所有正样本中，模型预测为正的比例
+
+**1、F1 score**=2/(1/P+1/R)=2PR/(P+R)
+**2、AP值**：即召回率-精度曲线下的面积
+可视化：
+    1、混淆矩阵
+    2、受试者特征曲线（ROC曲线）
+    3、曲线下面积（AUC）
+
+###### 	多分类
+
+##### 回归评估
+
+​	MAE（Mean Absolute Error）
+​	MSE（Mean Square Error）
+​	RMSE
+​	r2_score（决定系数）
+
+##### 非监督评估
+
+###### 聚类
+
+​		RMS（Root Mean Square）
+​		轮廓系数
+
+###### 关联模型
+
+​		支持度
+​		置信度
+​		提升度
+​			=置信度/支持度
+
+
+
+
+
+
+
+#### Model Pipeline
+
+![image-20230713190240099](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230713190240099.png)
+
+
+
+#### 模型解释与结果可视化
+
+[Shap](https://github.com/shap/shap)
+
+#### 案例
+
+[流失预警模型（二分类）](https://github.com/ben1234560/DataMiningCase)
+
+
+
+
+
+
+
+# Spotting something unusual
+
+## 1【业务理解】脑海中有业务大图：
+
+1. 首先理解包含业务模式、流程、组织关系、资源分配机制和核心商业目标及策略，然后基于具体业务，搭建全面的分析框架
+
+## 2【分析方法】科学的分析思路：
+
+面对具体业务，首先基于原始认知提出假设，然后通过量化方法去检验假设，最后形成新的认知，并建立循环
+
+
+
+### 常用模型
+
+[参考：28种商业模型和方法](https://blog.csdn.net/kl28978113/article/details/128659947?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0-128659947-blog-111080103.235^v38^pc_relevant_anti_vip_base&spm=1001.2101.3001.4242.1&utm_relevant_index=3)
+
+![img](https://img-blog.csdnimg.cn/img_convert/eea128a47665e1531607a3adeb02f4cc.png)
+
+##### RFM分析模型
+
+**RFM分析计算方式没有统一标准，一般分成两大类，一类是以每类的总均值为标准进行计算，一类是人为划分不同等级进行打分，按照得分再进行用户分类。一般做成三维坐标图**
+
+- 近度（Recency，最近一次消费到当前的时间间隔）
+- 频度（Frequency，最近一段时间内的消费次数）
+- 额度（Monetory，最近一段时间内的消费金额）
+
+| 客户类型     | 另一种分类   | R（客户粘性） | F（忠诚度） | M（消费力） | 对应的场景                             | 精细化运营                                    |
+| ------------ | ------------ | :-----------: | :---------: | :---------: | -------------------------------------- | --------------------------------------------- |
+| 重要价值客户 | 重要价值客户 |      高       |     高      |     高      | 优质客户，需要保持                     | 倾斜更多的资源，VIP服务，个性化服务，附加消费 |
+| 重要发展客户 | 重要深耕客户 |      高       |     低      |     高      | 优质客户消费频率低，需重点发展         | 交叉销售，提供会员忠诚计划                    |
+| 重要保持客户 | 重要唤回客户 |      低       |     高      |     高      | 优质客户最近无消费，需唤回             | DM营销，提供有用资源，通过续订或更新产品      |
+| 重要挽留客户 | 重要挽留客户 |      低       |     低      |     高      | 优质客户消费频率低且最近无消费，需挽留 | 重点联系或拜访，提高留存率                    |
+| 一般价值客户 | 潜力客户     |      高       |     高      |     低      | 价值低，但最近有交易且频率高，需挖掘   | 销售更高价值的产品                            |
+| 一般发展客户 | 新客户       |      高       |     低      |     低      | 最近有交易的新客户，有推广价值         | 提供免费试用，激发客户兴趣                    |
+| 一般保持客户 | 一般维持客户 |      低       |     高      |     低      | 交易次数多，但是贡献价值低             | 积分制，打折促销                              |
+| 一般挽留客户 | 流失客户     |      低       |     低      |     低      | 最近无消费，流失客户                   |                                               |
+
+
+
+##### 同期群模型
+
+###### **用户留存率模型**
+
+留存分析的一个先验条件就是假设用户使用产品的行为随着使用时间呈现**阶段性**变化，将用户生命周期的长度与用户各阶段信息量化并制成模型，通过该模型，调整产品或者运营手段对用户行为进行干预（最大化用户生命周期的价值）。
+
+如果一个同期群的留存情况发生了显著变化，就可以深入探究该同期群的用户特征或运营策略，找到用户流失的关键节点，以指导之后的业务。如果纵向对比不同同期群的用户留存有显著的区别，则可以反映出产品生命周期的变化。
+
+![img](https://pic2.zhimg.com/v2-ab581a2a60d790194176a5e30e34a95d_b.jpg)
+
+如上图所示：这是一份新注册用户留存数据，通过该用户留存率模型不难看出，11月28日和11月29日的留存率较其他时间相比偏低，说明该两日存在问题需要进一步分析。如果该两日新增用户人数和平时差不多，则考虑是否由于节日、周末或当日迎新环节出现问题；如果该两日新增用户人数比往日多，则考虑是否是为了冲量，找的劣质渠道。
+
+计算方法：
+
+- 设定用户分群（一般按注册时间or注册渠道）。
+- 从注册时间开始，观察每X天后，该批次用户的留存率。
+- 找到留存下降最明显节点，判断是否进一步深入分析。
+
+![img](https://pic4.zhimg.com/v2-58a2366af68bbe21c23f79d86db0a92b_b.jpg)
+
+```sql
+SELECT t_date
+ 	, COUNT(DISTINCT user_id) AS '留存人数'
+ 	, COUNT(DISTINCT user_id)/(SELECT COUNT(DISTINCT user_id) FROM userbehavior WHERE t_date = '2017-11-25') AS '留存率' 
+FROM userbehavior
+WHERE user_id IN (SELECT DISTINCT user_id FROM userbehavior WHERE t_date='2017-11-25')
+GROUP BY t_date 
+ORDER BY t_date ASC;
+```
+
+
+
+###### **用户LTV模型**
+
+如果在搭建用户留存率模型的时候，同步计算用户预计产生的价值，则可以计算出用户LTV（Life Time Value）。
+
+- 用前文方法，先算出用户留存数值
+- 计算每阶段，用户付费率、付费金额
+- 用户总价值=留存用户 * 付费率 * 付费金额
+- 引申：对单个用户LTV = 某批用户付费总额 / 用户数
+
+![img](https://pic4.zhimg.com/v2-37d80ed76eec4364d91aad503bc2916b_b.jpg)
+
+目前行业里计算LTV比较流行的方法：
+
+LTV = LT × ARPU
+
+- **LT：**即Life Time，代表群体用户的平均生命周期长短；
+- **ARPU：**即Average Revenue Per User，代表每个用户在某个周期内的平均收入。
+
+ARPU值的单位是某个周期内的用户平均收入，比如一年内的平均收入、3个月平均收入。相应的LT的单位也需要是年、月。只有这样，才能保证LT和ARPU两个数值相乘，得到的结果的单位是金额（收入、贡献）。
+
+
+
+###### **商品LTV模型**
+
+类似于在览众开发的生命周期模型，可以用增速来判断
+
+- 设定商品等级（不一定是商品质量，可以依据商品sku划定等级）
+- 从商品上市时，开始观察
+- 观察商品上市后销量/利润走势
+- 对比每个等级商品，是否达成该商品平均水平
+- 如表现优于平均，则重点关注缺货问题，保障供给
+- 如表现劣于平均，则重点关注积压问题，减少库存
+
+![img](https://pic1.zhimg.com/v2-94bc7f8d6e872498a14a9793c19b29cc_b.jpg)
+
+
+
+###### **渠道质量分析模型**
+
+- 按渠道+投放广告时间，分类新注册用户
+- 关注该渠道+投放时间进入用户，后续X天转化率/付费
+- 计算用户产生的消费，对比渠道投放成本
+- 针对转化好的渠道，考虑追加投放
+- 针对转化差的渠道，消减预算/整改投放措施
+
+![img](https://pic1.zhimg.com/v2-83ea22668f94120493ca10ca524d2568_b.jpg)
+
+### 指标体系搭建与异动归因
+
+
+
+指标一般分为4个模块：
+
+| 模块 | 内涵                                   |
+| ---- | -------------------------------------- |
+| 广度 | 反映业务产品总规模，如用户总量         |
+| 深度 | 反映业务产品渗透程度，如人均观看时长   |
+| 频率 | 反映业务产品持久性，如次日留存，周留存 |
+| 效率 | 反映业务产品质量及收益，如ROI          |
+
+**一级指标：衡量公司的战略和目标，5个左右**（北极星指标）
+
+**二级指标：针对以及指标的路径型拆解，并且可以更高效定位一级指标波动原因**
+
+**三级指标：直接引导日常运营决策，一线可以直接产生行为**
+
+#### 找到业务的北极星指标
+
+##### **原则一：商业模式决定产品/用户价值，价值决定指标选择**
+
+制定指标不是为了指标本身，而是传达一种对产品和用户价值理解，能确切衡量业务表现，业务变好指标向好，业务下坡指标预警，非滞后。
+
+##### **原则二：指标目标本身符合SMART原则**
+
+指标本身要足够清晰具体，可观测可衡量可预测，从而可以指导着每个一个员工的每一个决策和行动，走正和跑偏之间，往往差一个北极星指标在指引。
+
+**SMART原则解析**
+
+- 目标必须是具体(Specific)。
+- 目标是可以衡量的(Measurable)。
+- 目标可实现(Attainable)。付出努力可实现，避免设立过高或过低的目标，踮踮脚可以达到的。
+- 目标和业务是相关性(Relevant）。业务部门的努力和懈怠是和它的目标相关联的，不然就会导致大家不在一个方向上努力，效率低。
+- 目标有明确的截止期限(Time-bound)。目标的评估考核需要一个时间期限。
+
+##### 举例：
+
+| **商业模式**               | **核心价值**                                                 | **常见的北极星指标**         |
+| -------------------------- | ------------------------------------------------------------ | ---------------------------- |
+| 交易类京东、eBay、美团买菜 | 产品链接其他资源提供的价值，给用户提供商品或服务，满足便利性 ➡️ 用户下单购物 🛒 | GMV、订单量等                |
+| 内容类头条、抖音、小红书   | 产品自身有价值，给用户提供丰富的内容，满足娱乐性  ➡️ 用户阅读创作 📕 | 阅读量、停留时长、作品数等   |
+| 社交类微信、QQ、Facebook   | 产品链接其他资源提供的价值，给用户提供交流平台 ➡️ 用户间信息传输📱 | 消息数、发送过消息的用户数等 |
+| 工具类剪映、语雀、芦笋     | 产品自身有价值，提供封装好的各样式接口，帮助用户省时间 ➡️ 用户使用付费💰 | 使用量、续费率等             |
+
+##### 案例链接：
+
+###### 【小红书】
+
+https://mp.weixin.qq.com/s/bcqxhMIAZhWBj0rAFjppZA
+
+
+
+
+
+##### **注意：**
+
+​	1. 北极星指标并非一成不变，而是随着业务的发展发展阶段不断迭代，比如新产品初期增长是核心模块，【活跃用户量】可作为北极星指标，随着产品影响力业务体量增大，【用户满意度】需要作为北极星指标指标考察。
+
+ 	2. 如果发现单一指标不能反映业务的成长情况，可以考虑加入反向指标作为“制衡指标”。比如电商：北极星指标=GMV，反向指标：退货率
+ 	3. 针对北极星指标，进行路径型拆解，达到可以高效定位指标波动原因，直接引导日常运营决策
+ 	 ![图片](https://mmbiz.qpic.cn/mmbiz_png/a4M6jF95cDzW12rfXqq3vs1KNib1ic5X9MeNRZsiaHlOCzLQhyjU4gKLLeasaaia2zjcz2WTI1tX9vZfhoQ2R3sZiag/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+#### 异动分析具体方法
+
+##### 方法一：逻辑树分析（因子拆解+维度拆解）
+
+因子拆解是能够用于准确计算北极星指标，例如
+
+![图片](https://mmbiz.qpic.cn/mmbiz_png/a4M6jF95cDzW12rfXqq3vs1KNib1ic5X9MZzRTqbyicnoOcEiabMZuoY5D9RickicvDTWZt87utyIcLT7oAYWGHWRcjw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+
+
+##### **方法二：全链漏斗【海盗模型】**
+
+###### 用户产品类【海盗模型】：
+
+涵盖产品/业务全生命周期，常见方法是梳理用户旅途。仅用于说明影响北极星指标的各个细分指标之间的关系，而无法用于计算准确的北极星指标。
+
+只适合**基于移动APP的游戏、电商、O2O、社交平台类业务**，不适合耐用品、B2C的业务。
+
+![图片](https://mmbiz.qpic.cn/mmbiz_png/a4M6jF95cDzW12rfXqq3vs1KNib1ic5X9Mp3A8b0icGcT9dHfchJbwaUCtwh7TeRtwWCovTVCbMbkV8Bo5ZR6SgeA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+![图片](https://mmbiz.qpic.cn/mmbiz_png/a4M6jF95cDzW12rfXqq3vs1KNib1ic5X9MsxU9mGrzzDxgm2iaIrk6X9ymNZFibEnfUbFCmicXE1E2IEmIzCkmmicgmw/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+![图片](https://mmbiz.qpic.cn/mmbiz_png/a4M6jF95cDzW12rfXqq3vs1KNib1ic5X9MJPgE3KQ0ic1X6RLKZr9h95KP2dBmGLdc9z5ooZVLM9G9xYSibRM4Gw6g/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+![图片](https://mmbiz.qpic.cn/mmbiz_png/a4M6jF95cDzW12rfXqq3vs1KNib1ic5X9MPPNn7mEcPu8ibVwlRAiclvM1VF96ZJdzbmcHh4EibkZHSlOqzkfO7NVzg/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+![图片](https://mmbiz.qpic.cn/mmbiz_png/a4M6jF95cDzW12rfXqq3vs1KNib1ic5X9MkBSjt8PzUTzPXia2yE5Eh1jaLmiaYhP5fj6o1icDmjfsaib1AgicuCfysMA/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+![图片](https://mmbiz.qpic.cn/mmbiz_png/a4M6jF95cDzW12rfXqq3vs1KNib1ic5X9MxKHS2OOJE0kZzngVMPKZ8LQz8ciaNuYSZjXwB2y0k5GH79JVW4n95mQ/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+###### 业务流程类：
+
+![img](https://pic4.zhimg.com/v2-fde668c6f6d4dfd3bcc27a63fda64163_b.jpg)
+
+![img](https://pic1.zhimg.com/v2-818d912940a96f85c87152ff2afc67a8_b.jpg)
+
+第一步：添加辅助数据，目的是为了让要展示的数据居中，(500-100)/2 = 200
+
+第二步：选择数据区域【环节+客户数+辅助数据】--添加图表--选择堆积条形图
+
+第三步：选择纵坐标轴--设置坐标轴格式--坐标轴选项--点选逆序类别
+
+第四步：右击图表--选择数据--把辅助数据放在客户数前面
+
+第五步：选中辅助数据条形图，填充更改为无填充
+
+
+
+###### 注意：
+
+- **漏斗是针对单个流程的：**不同的流程，需要用不同的漏斗来描述。
+
+- **真正业务上漏斗会拆分的非常详细：**通过应用埋点对玩家付费行为进行分析，发现用户点击“购买”到“充值”的转化率低；“充值”到付费成功的转化率很低，则需要进一步分析是因为支付设置不合理或者因为充值金额设置不合适等原因。
+
+- **漏斗模型只能发现存在问题的环节，并不能直接得出原因：**具体业务场景下，需要运营人员根据自己的经验以及其他数据模型进行进一步分析判断。
+
+- **漏斗分析往往可以帮助我们寻找到最优的转化路径：**比如在淘宝浏览商品到下单购买这一流程，可能存在着“浏览-收藏-加购-下单”或“浏览-加购-下单”再或者“浏览-收藏-下单”等多条路径，通过漏斗模型可以找到转化率最高的是“浏览-加购-下单”，可以通过促进用户“浏览-加购”、收藏商品及时加购等方法促进用户把商品放入购物车，以提高整体转化率。
+
+  
+
+##### 方法三：归因分析（假设检验）
+
+
+
+
+
+##### 方法四：相关分析法
+
+计算相关系数
+
+
+
+
+
+##### 方法五：对比分析法
+
+具体应用在先问是不是的步骤，即异动是否真的发生了？
+
+##### 方法六：杜邦分析
+
+##### 
+
+|      |      |      |      |      |      |      |
+| ---- | ---- | :--: | :--: | :--: | ---- | ---- |
+|      |      |      |      |      |      |      |
+|      |      |      |      |      |      |      |
+|      |      |      |      |      |      |      |
+|      |      |      |      |      |      |      |
+|      |      |      |      |      |      |      |
+|      |      |      |      |      |      |      |
+|      |      |      |      |      |      |      |
+|      |      |      |      |      |      |      |
+
+方法九：同期生存
+
+##### **注意**：
+
+**1）数据口径应该让人一看就能明白，要深入思考统计这个数据指标是为了支撑什么业务判断，充分考虑业务场景来设计数据指标**
+
+**不要：转化率为80%；建议：下载->注册80%，注册->试用90%**
+
+**2）先看规模，即影响用户的占比/覆盖率，再看质量/效率**
+
+**不要：用户次日留存50%；建议：用户量100M，次日留存50%**
+
+**3）显著、大幅、极大、非常……这类主观且不明确的表述方法不要用，讲具体的数据变化，应用 『 A->B（+xx%）』**
+
+**不要：用户从注册到转化平均用时减少0.5天；建议：用户从注册到转化平均用时从2天下降到1.5天（-25%）**
+
+
+
+#### 异动分析具体案例
+
+##### **第一、先问是不是？**
+
+首先根据业务sense判断，XX%的异动是否是正常。记住核心业务数据概况和大体的weekly/biweekly/monthly的周期性趋势。
+
+
+
+##### **第二、再问大的为什么？**
+
+排查技术原因、重大运营活动以及外部事件。
+
+排查这三类是因为，此类原因从数据上排查困难，但是只要问对人得到答案则很快，理应在第一时间询问。这要求分析师要和运营产品研发同学有密切的联系，以及保持对实事的敏锐度。
+
+
+
+##### **第三、最后问小的为什么？**
+
+按照归因逻辑横向和纵向拆解，大盘指标异动常见的拆解思路👇：
+
+一是**横向拆解**，快速收敛问题范围，**找出对大盘指标影响最大的子集**。
+
+二是**纵向拆解**，适用于漏斗分析，**定位哪个板块哪个转化环节出了问题**。
+
+
+
+**举个例子，某平台GMV指标归因**
+
+**GMV = 生鲜GMV + 服饰GMV + 电子产品GMV**
+
+横向拆解可以得到：GMV下降主因是生鲜品类的下降引起，根本原因在于“舟山地区台风影响货源减少”
+
+**GMV = 商品曝光 -> 商品点击 -> 商品购买**
+
+纵向拆解可以得到：GMV的下降主因是商品曝光到点击转化率下降引起，根本原因在于“新推荐算法上线”
+
+
+
+![图片](https://mmbiz.qpic.cn/mmbiz_png/a4M6jF95cDzW12rfXqq3vs1KNib1ic5X9M3Ay4TvrtM2gnPo2qAKOibdfVAELl4e1zGrKb8tv1JJ0nprgU52mTia7A/640?wx_fmt=png&wxfrom=5&wx_lazy=1&wx_co=1)
+
+#### 量化分析方式
+
+##### **加法指标-Delta法**
+
+**从上周到本周，总DAU从300下降250，相对下降16.7%，原因是啥？**
+
+按照国家维度拆解DAU，DAU = 国家A的DAU + 国家B的DAU
+$$
+某维度贡献值 = 该维度现期值 - 该维度基期值 \\
+某维度贡献率 = \frac{该维度现期值 - 该维度基期值}{大盘现期值 - 大盘基期值}
+$$
+![image-20230510161012727](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230510161012727.png)
+
+##### **除法指标-加权占比法**
+
+**从上周到本周，DAU Day1留存率60%从下降到50%，绝对下降10%，原因是啥？**
+
+按照国家维度拆解，Day1 留存率 = Day1 总留存人数 / 总DAU = R1 / DAU
+
+虽然整体指标不能像加法指标那样，直接维度项指标相加，但是等于**维度项的加权平均值**：
+
+总DAU = 国家A的DAU + 国家B的DAU = DAU_a + DAU_b
+
+Day1 总留存人数 = 国家A的Day1 留存人数 + 国家B的Day1 留存人数 = R1_a + R1_b
+
+Day1 留存率 = 国家A Day1 留存率 * 国家A DAU占比 + 国家B Day1 留存率 * 国家B DAU占比
+
+Delta留存率 = (当国家DAU占比不变时)[国家A Day1 留存变化 + 国家B Day1 留存变化] + 国家A和B DAU占比变化
+
+##### **维度排名-基尼系数**
+
+衡量该维度下，维度项的影响因子分布和权重分布的差异状况
+
+假设某个维度下有n个枚举值，它们的影响因子分别是x1 ... xn，权重分别是w1 ... wn
+$$
+\text { GiniCoefficient }=\frac{\sum_{i=1}^n \sum_{j=1}^n w_i w_j\left|\frac{x_i}{w_i}-\frac{x_j}{w_j}\right|}{2 \sum_{i=1}^n\left|x_i\right|}=\frac{\sum_{i=1}^n \sum_{j=1}^n\left|x_i w_j-x_j w_i\right|}{2 \sum_{i=1}^n\left|x_j\right|_{\text { }}}
+$$
+
+| **维度** | **维度项** | **影响因子x** | **权重w** | **基尼系数** |
+| -------- | ---------- | ------------- | --------- | ------------ |
+| 国家     | A          | 40%           | 33%       |              |
+|          | B          | 60%           | 67%       | 0.07         |
+| 渠道     | C          | 90%           | 50%       |              |
+|          | D          | 10%           | 50%       | 0.4          |
+
+### 案例：
+
+[淘宝百万级用户行为分析（上）——漏斗模型实战](https://zhuanlan.zhihu.com/p/517004268)
+
+[游戏数据分析——新增、付费和用户行为评估](https://zhuanlan.zhihu.com/p/521271199)
+
+### 思考：
+
+**保持对业务整体/行业信息的敏感度**
+
+真实的业务归因时，除了指标拆解，还需要相关指标分析，即找到和分析指标强依赖的其他业务指标或宏观指标(微信指数/百度指数/Google Trend)，此部分需要较强的前置的业务认知，依赖于分析师对业务和行业的理解和梳理，形成对市场大盘晴雨表的基本认知。
+
+🌰在线英语课程包转化用户比例上涨，量化归因发现各个维度均上升，结合市场数据验证：疫情放开 -> 市场对出国旅游兴趣度⬆️ -> 用户会在各大网站搜索值⬆️ -> 微信/百度指数⬆️
+
+**站在业务视角，往业务中再走一步**
+
+量化归因往往得到的是一个冷冰冰的Fact，最理想的状态是，尽可能将归因结果和业务能采取的Action联系起来，真正实现通过指标归因赋能业务增长。这一点除了分析师自身多加思考外，还需要和业务同学互通有无，惺惺相惜。
+
+🌰在线英语课程包转化用户比例下降，量化归因发现大学生的比例上升(大学生表现差于上班族)
+
+除了对数据有一个解读外，可以进一步思考为什么大学生表现差于上班族，业务能不能做点啥：1）运营侧：大学生付费能力远低于上班族，但是用户群体大，能否安排组团优惠活动？2）产品侧：大学生本身对趣味性要求强，安排社区活动（英语角、对赌）让其参与赚积分，增加用户留存转化
+
+
+
+## 3【数据可视化】
+
+### **第一步：理解你的目的和受众**
+
+首先要思考你的受众是谁，你想表达的内容是什么，最终你想达到什么目的。分析之后，再开始着手如何用可视化表达结论。（此处也可以通过收集受众意见不断迭代，但中心思想不能乱）。学会把故事精练到三分钟，然后提炼中心思想。你越能精炼地陈述表达，说明你掌握地越清楚。
+
+### **第二步：选择有效的图表**
+
+图表样式可能很多种，但通常那常见的十几种图表，就能满足绝大多数用户的需求（二八原则）。并不要因为图表本身简单千篇一律而选择一些新颖复杂的图表，**图表本身不是目的，背后想要传达的含义才是关键。**而越熟悉越简单的图表类型越容易让受众理解。
+
+### 几个重要原则：
+
+#### **当只有一两项数据需要分享时，直接使用数据本身**
+
+![image-20230428151432521](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230428151432521.png)
+
+#### **弱化边框表格，突出数据；添加条件格式，让用户一目了然**
+
+![image-20230428151520305](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230428151520305.png)
+
+
+
+**图形与视觉系统交互，更快处理信息，注意避免坐标轴的障眼法**
+
+
+
+![image-20230428151608142](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230428151608142.png)
+
+
+
+#### **水平条形图展示分类数据，把重要的信息放在页面的左上角**
+
+一般人阅读的顺序是“之”字型的，实际数据之前先看到类别的名称，而不像竖直条形图，在数据和类别名称之间来回转动眼球
+
+![image-20230428151907718](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230428151907718.png)
+
+
+
+#### **利用视觉认知，在图表中消除不必要的杂乱。**
+
+1) 表格各行上色让关注关注行（相似原则）；2）阴影区域隔开两阶段数据；3）剔除背景和边框，图形仍完整
+
+![image-20230428152059174](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230428152059174.png)
+
+
+
+#### **利用前注意属性，让受众不知不觉看到我们期望展现的内容**
+
+![图片](https://mmbiz.qpic.cn/mmbiz_jpg/a4M6jF95cDzW12rfXqq3vs1KNib1ic5X9MUyEwD1rsjGFMiafeJbK70FXTEWgJOzaz6MzHfl5qdJcTgRiajkVAuialg/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+
+![图片](https://mmbiz.qpic.cn/mmbiz_jpg/a4M6jF95cDzW12rfXqq3vs1KNib1ic5X9Mib9icwTB7rdND8KxibNlrnfI27mvmJYJm4Kvic3rFicFQQuiaHTLqpTLFtXw/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+
+![图片](https://mmbiz.qpic.cn/mmbiz_jpg/a4M6jF95cDzW12rfXqq3vs1KNib1ic5X9MvXaqSCSVWe37BTHwzic6h9Y2wM6qMz74kzuETluqpTWricKDBhz0nr3Q/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+
+![图片](https://mmbiz.qpic.cn/mmbiz_jpg/a4M6jF95cDzW12rfXqq3vs1KNib1ic5X9MYIKwj3WicyFibFQXCkC0w3LfBuAqCfJicuVIiccMyDoKvzSPO3qQmSiadwQ/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+
+![图片](https://mmbiz.qpic.cn/mmbiz_jpg/a4M6jF95cDzW12rfXqq3vs1KNib1ic5X9MrkeoCErneSVpJohvU6YXwqoSaXtdeVOAjFV7MZ15AiasOQWuAqJu9WQ/640?wx_fmt=jpeg&wxfrom=5&wx_lazy=1&wx_co=1)
+
+#### **Less is More，合理留白，巧用色彩利器，**
+
+不宜多彩，颜色的选择可结合品牌色系
+
+![image-20230428153214049](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230428153214049.png)
+
+#### **聚焦观众视线，避免视觉无序，降低认知负荷**。
+
+剔除边框、网格线、数据标记、小数点，图例简洁，利用色彩饱和度突出中带你，横轴水平减少阅读障碍。
+
+![image-20230428153403022](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230428153403022.png)
+
+#### **想清楚图表想表达的信息，只保留和突出最重点内容。**
+
+![image-20230428153424026](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230428153424026.png)
+
+#### **恰当使用文字****
+
+，相应的数据可视化图表应该不需要任何门槛，让任何背景的人都能理解**
+
+![image-20230428153526114](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230428153526114.png)
+
+![image-20230428153533771](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230428153533771.png)
+
+
+
+## 4 【数据资产】
+
+## 指标与指标体系
+
+
+
+### 指标的构成：
+
+#### 1.维度
+
+#### 2.汇总方式
+
+#### 3.量度
+
+## 埋点
+
+“埋点”是针对特定用户行为或事件进行捕获、处理和发送的相关技术及其实施过程。
+
+### **埋点的分类**
+
+[框架及分析](D:\书籍笔记\数据分析\学习笔记\数据埋点框架及分析.xlsx)
+
+埋点一般会分为三类：点击事件、曝光事件、页面事件
+
+- **点击事件**
+
+用户在应用内的每一次点击行为，都可以记为一次点击事件。比如按钮的点击，区域的点击，点赞，打开网页等，都可以成为一个点击事件。比如点击的PV、UV。
+
+- **曝光事件**
+
+曝光事件是为了统计应用内的某些局部区域是否被用户有效浏览。当用户成功进入一个页面时记录一次数据，刷新数据也会记录一次。一般来说我们在衡量页面某个区域用户的点击率的时候，首先需要搞清楚的就是这个区域到底被多少用户看到了，每被用户看到一次就是一个简单的曝光事件，然后才能计算点击率。
+
+- **页面事件**
+
+页面事件通常是指页面的各种维度信息的统计。比如页面浏览的PV、UV
+
+### 埋点的流程
+
+#### 1 预备工作
+
+一个产品需要进行埋点体系建设，是离不开一套埋点系统的。为了使埋点工作顺利进行，都需要有基础的埋点系统，有自研的埋点系统（个性化程度高，能保证保密性，但研发成本高、周期长），也有像Google  Analytics、神策等三方平台提供的相应服务（开发成本较低，可以较快的实现埋点需求，但定制化服务需要额外付费）。
+
+#### 2 需求评审
+
+在日常活动运营或者数据复盘时，若发现某些数据之前未获取过，这个时候业务方（可以使运营部门、产品部门等）根据业务需求提出获取数据的需求；数据分析师则需要在了解业务方的需求的情况下，综合判断实现难度（需求是否合理、已有数据能否满足、是否需要新增埋点）；最后，各个部门一起互相探讨研判，敲定埋点需求。
+
+- 明确产品脉络和架构：对产品整体把握，明确该需求的具体意义，全局化思考；
+- 理解埋点的具体价值和需求场景：明确我们要分析什么样的场景，解决什么业务问题，需要哪些数据；
+- 梳理核心业务流程或页面：将用户与系统的交互故事完整的梳理出来，更直观准确的对需求进行解构。
+
+#### 3 撰写埋点文档
+
+埋点文档可以由产品经理完成，也可是由数据分析师完成，具体看公司的职责分工。由于埋点工程师可能不一定了解详细的业务和产品信息，作为数据分析师，我们需要将业务方的需求转换成埋点工程师可以看懂的文档。
+
+分析思路：
+
+- 根据运营和产品的业务需求，提炼出关键指标；
+- 拆解指标，定义事件（可以被记录到的操作和行为）、事件触发条件、key、value以及value值；
+- 整理成埋点文档（如下图）
+
+![img](https://pic2.zhimg.com/v2-d04c287240718ecd537f6c00da446039_b.jpg)
+
+#### 4 埋点评审
+
+在整理完以上的表格之后，需要和其他产品、运营、开发对一下这份文档，看看是否有其他遗漏；埋点工程师也会评审这份埋点工作复杂度情况如何，是否需要简化。
+
+#### 5 埋点开发
+
+如果是公司自研的埋点系统，这个任务就会落在开发头上。
+
+如果公司购买的是第三方服务，这一步就是产品经理或者数据分析师对接三方人员。
+
+#### 6 埋点测试与验收
+
+埋点工作完成后，需要验证开发的埋点是否与当初设计的一致、能否采集到需要的数据、准确性如何。确认无误后进行业务验收，主要验证数据是否采集正确，没有问题的话就可以随产品更新发布进行上线了。
+
+上线后还需要进行线上验证，以验证数据是否符合预期。
+
+# Identifying themes
+
+# Discovering connections and causal recognizing
+
+
+
+## AB  Test
+
+1 明确实验要素
+
+1.1 明确实验目标
+
+- 实验目的：通过改变操纵因子，考察操纵因子与因变量之间的因果关系，例如折扣券对于用户通过APP浏览并下单的影响
+- 实验单元：实验中操纵因子改变涉及的对象，如APP用户
+- 操纵因子：实验分析的自变量，如折扣券
+- 操纵因子水平：操纵因子可能的取值
+- 因变量：可测量到的随操纵因子变动的变量，如用户APP浏览-下单率
+- 效能：由操纵因子变动导致因变量变动的水平， 如实验组用户APP浏览-下单率较对照组提升3%
+
+1.2 确定核心指标
+
+1.3 提出假设
+
+AB test的本质是假设检验，原假设一般为p1-p2 = 0
+
+2 实验设计
+
+2.1 估计最小预计提升
+
+在test之前，需要建立一个心里预期，即当实验组比对照组提升了多少的效果时，我们才认为实验组的方案有实际价值。最小预计提升（MDE）是指在实验前需要确定的实验预期提升的百分比。
+
+2.2 预估样本量
+
+AB test需要满足最小样本量的要求，以保证测试相对准确（第一类错误$\alpha$），和达到足够的统计功效（第二类错误$\beta$）。样本量计算公式：
+$$
+n = \frac{2\sigma^2(z_{1-\frac{\alpha}{2}}+z_{1-\beta})^2}{\Delta^2}
+$$
+其中，
+
+$\Delta$：样本均值预期最小提升；$\sigma^2$：样本方差，在比率指标的情况下$\sigma^2 = p*(1-p)$；$\alpha$：第一类错误概率，一般取值为0.05；$\beta$：第二类错误概率，一般取值为0.1或0.2；$z$：正态分布累计概率为x时对应的分位数
+
+for example: 如果实验的核心指标时用户浏览-下单率，我们需要观察这个指标过去一段时间的历史数据，给出它们的基础转化率。观察前两周的数据，得出用户浏览-下单率为67%左右，实验预期下单率提升2%，显著性水平和统计功效通常取0.05和0.1。
+
+根据以上参数，则该实验每组所需最小样本量为：
+$$
+n = \frac{2*[0.67*(1-0.67)](1.96+1.28)^2}{0.02^2} = 11605
+$$
+2.3 预估实验时长
+
+实验时长和样本量有关，需要保证流量最小的那组达到最小样本的需求。并且由于周天数会影响实验效果，一般实验取整周。
+
+2.4 A/A实验
+
+在开始A/B 实验之前，我们需要先进行与试验周期等长的A/A实验。所谓A/A实验，就是实验组和对照组上线一模一样的策略，用来检测分组方式本身带来的差异，给A/B实验两组差异提供参考。特别注意的是，A/A实验与A/B实验的时间最好一致，包括起点和终点，即假如A/A实验从周三开始，则A/B实验也最好从周三开始。类似DID的共同趋势检验。
+
+3 实验过程监控
+
+3.1 数据检查
+
+（1）检查分组是否均匀
+
+举个例子，如果实验监控的指标是APP下单率，那么实验周期内打开APP的次数就是在这个实验的样本量。对于平均划分流量的实验，我们可以检查实验组和对照组每天打开APP的次数是否近似，一般来说，在样本量足够的情况下，10%的差异就可能说明流量分配的随机性存在问题，比如实验分为4组，配置的流量比例分别是21%，38%，24%和17%，需要检查实际打开APP的次数是否基本符合这个比例。
+
+（2）检查是否有异常数据
+
+实际场景下，收特殊天气、节假日、大型活动或者其他运营活动的影响，可能某天的数据不太正常，可以通过每天数据的折线图快速发现问题。此外，在实验过程中也需要检查指标结果是否符合预期，例如运气下单率是40%-50%，如果实验结果与预期差距较大，应当检查数据计算方式是否有差。
+
+3.2 实验结束标准
+
+注意：看到实验结果可信就立即停止实验是错误的。对于很多实验来说，实验前段时间的显著性是在显著和不显著之间波动的，特别是对于UI改版，这种用户有直观感受的运营方案，实验组的任何改变都会引起用户的特别注意，因此需要足够的样本量和更长的实验周期涵盖实验前期的波动，知道显著性趋于平稳。此外，如果实验过程中出现异常事件，如异常天气等，可能需要延长实验周期以获取更多样本。
+
+4 案例
+
+1.实验背景：
+
+- 实验目的：相对于电子商城改版前的对照组，提升实验组用户平均点击率
+- 实验单元：打开App首页的用户
+- 操纵因子：电子商城的改版
+- 操纵因子水平：电子商城是否改版
+- 因变量：电子商城产品点击率（基于次数的点击率PV和人数的UV）
+
+2.实验样本量及周期
+
+以广告点击转化率为主要观测指标，平均PV转化率约为5%，预测提升为2pp，显著性水平$\alpha = 0.05$，功效系数$\beta = 0.9$，计算样本量可得：2495.5129770921467
+
+```
+import numpy
+import scipy
+from scipy.stats import norm
+
+#最小样本量计算
+#a为对照组 b为实验组
+
+sigma2=0.05*(1-0.05) #样本方差（率指标）
+alph=0.05 #第一类错误概率，一般取值为0.05
+beta=0.1 #第二类错误概率，一般取值为0.1或0.2
+mde=0.02 #样本均值预期最大提升（MDE）
+z1=norm.ppf(1-alph/2)
+z2=norm.ppf(1-beta)
+n=(2*((sigma2))*((z1+z2)**2))/mde**2 #最小样本量公式
+print(n)
+```
+
+
+
+3.A/A对比结果
+
+| 组别   | **样本量** | PV点击率 | UV点击率 |
+| ------ | :--------: | -------- | -------- |  |
+| 对照组 |    2498    | 5.13%    | 8.35%    |  |
+| 实验组 |    2528    | 5.27%    | 8.40%    |  |
+
+可以计算得出，两组的PV和UV点击率差异都不显著
+
+
+
+4.实验效果评估
+
+A/B实验结束后，样本量达到实验预期提升所需数量，对购买量、点击率或转化率等进行显著性检验，计算公式如下：
+$$
+z = \frac{\bar{x}_{B}-\bar{x}_A}{\sqrt{\frac{S^2_A}{n_A}+\frac{S^2_B}{n_B}}}
+$$
+需要指出的是，在比较两组样本率指标的时候（如男生占比、转化率、购买率等），公式中的$\bar{x}_A$和$\bar{x}_B$应转化为$P_A$和$P_B$，而两组的方差为：
+$$
+S^2_A = P_A*(1-P_A) \\
+S^2_B = P_B*(1-P_B)
+$$
+假设实验后结果如下表
+
+| 组别   | **样本量** | PV点击率 | UV点击率 |      |
+| ------ | :--------: | -------- | -------- | ---- |
+| 对照组 |    2498    | 6.08%    | 8.35%    |      |
+| 实验组 |    2528    | 9.73%    | 11.95%   |      |
+
+
+
+则根据显著性检验结果：
+
+```python
+#实验评估
+x_a=0.061 #对照组样本均值
+x_b=0.097 #实验组样本均值
+s_a2=0.061*(1-0.061) #对照组样本方差
+s_b2=0.097*(1-0.097) #实验组样本方差
+n_a=2498 #对照组样本数
+n_b=2528 #实验组样本数
+z=(x_b-x_a)/(s_b2/n_b+s_a2/n_a)**0.5 #z值公式
+p=norm.cdf(z) 
+print(1-p) #p值小于0.01 拒绝原假设
+```
+
+
+
+## AB Test 扩展
+
+### 随机区组设计
+
+在简单A/B 实验中，实验单元的差异可以分为两部分：一部分是实验组和对照组之间的组间差异，另一部分是实验单元自身随机性带来的组内差异。当组间差异较大，组内差异较小时，在假设检验中可以很容易地观察道显著的实验效果；反之，当实验的组内差异较大的时候，假设检验很容易不显著。
+
+在随机区组实验中，除了在分流时按照区组采用分层抽样外，其他的实验设计和简单A/B 实验并无不同。此时，差异可分为三部分：（1）组间差异，此处无差；（2）组内差异：由分组的分层随机抽样带走一部分；（3）剩余的组内差异就变小了。
+
+此外，在简单A/B 实验中，需要保证样本量大于最小样本量，但在随机区组实验中，由于实验样本的方差变小，最小样本数自然会下降，可以避免等到实验样本量需求过大。
+
+因此，随机区组实验有两个好处：一是可以在实验样本量不够的情况下继续进行实验，以节约样本量需求和项目预算；二是能降低剩余的组内方差，产出更准确的实验估计。
+
+随机区组实验的特征选择
+
+理论上说，每一个实验都有观测变量，那么只要是对观测变量有显著作用，且不受本次策略影响的特征，都可以作为区组候选，并且不应同时使用共线性较强的特征来划分区组。举个例子，某运营策略是通过发补贴的方式提高用户的消费金额（GMV），那么可以根据历史影响用户消费的隐私建模。业务经验告诉我们，高频/低频，白天/夜间活跃用户的GMV是不同的，且此类特征不受发补贴的影响，因此可以作为区组实验的分组方式。
+
+随机区组实验应用步骤
+
+1. 明确实验目标及背景
+
+2. 实验设计
+
+   利用业务经验和历史数据，寻找可能减少样本方差的特征，然后通过回归方程找到区组特征候选，并按照缩小后方差计算最小样本数。在满足最小样本数的情况下，按照分层抽样的方式进行实验组、对照组的分流。
+
+3. 实验过程监控
+
+   分流后，首选进行A/A实验，采用多元回归方程，将实验组、对照组没有实验策略的时间段作为回归数据，加入分组标签以及区组标签，如果发现实验组/对照组标签对于实验观测指标没有显著的区别，则可认为随机分流成功，A/A实验通过。
+
+4. 回归模型原理
+
+   不同于简单A/B实验的回归模型：$Y=\alpha+\beta_1 * exp +\epsilon$，随机区分的回归模型为：
+   $$
+   Y=\alpha + \beta_1 * exp +\beta_2 * Block + \epsilon
+   $$
+    在基础模型上加入了一个区组的类别变量Block，实际上类似于控制变量的思想
+
+随机区组实验案例
+
+实验背景为：假设通过向用户发送优惠券的方式，提高游湖在未来一段时间内使用某产品的概率，以达到优化用户GMV的目的。
+
+假定用户标签是所选区组特征，则首先需要验证这个特征对观测变量GMV是否有影响，并且是否会被是否发送优惠券影响
+
+即开展如下回归:
+$$
+GMV_{历史} = \alpha + \beta * user\_tag + \epsilon
+$$
+而在验证完此回归之后，需要将随机区组加入基本回归方程：
+$$
+GMV = \alpha + \beta_1 * exp +\beta_2 * user\_tag + \epsilon
+$$
+并将以上结果与不加入随机区组的基本回归方程进行对比：
+$$
+GMV = \alpha + \beta_1 * exp  + \epsilon
+$$
+可以看到，相较于加入随机区组的实验结果，基本回归方程的结果中组内差异更大，导致F检验的显著性变差。
+
+```python
+import numpy as np 
+import pandas as pd 
+from statsmodels.regression.linear_model import OLS, GLS 
+import statsmodels.formula.api as smf
+import statsmodels.api as sm
+
+
+#模拟数据
+arr_data = np.array([[0,0,0,0,1,1,1,1,2,2,2,2],
+                     [53,57,55,47,53,60,47,43,53,45,49,41],
+                     [51,54,53,47,52,48,50,44,48,48,44,47]])
+print(pd.DataFrame(arr_data))
+df_data_t = pd.DataFrame(arr_data[[0,1]], index=['user_tag','gmv']).T
+df_data_c = pd.DataFrame(arr_data[[0,2]], index=['user_tag','gmv']).T
+df_data_t['exp'] = 'treatment'
+df_data_c['exp'] = 'control'
+df_data_unit = pd.concat([df_data_t, df_data_c])
+
+df_data = pd.concat([df_data_unit]*6)
+
+df_his_data = df_data[df_data['exp']=='control'][['gmv','user_tag']]
+df_his_data.columns = ['gmv_his','user_tag']
+
+#实验设计中的历史数据验证，验证user_tag对gmv的影响
+model_block = smf.ols(formula='gmv_his ~ C(user_tag)', data=df_his_data)
+results_block = model_block.fit()
+df_anova=sm.stats.anova_lm(results_block, typ=1)
+format_dict={'PR(>F)':'{:,.2%}'.format}
+df_anova.style.format(format_dict)
+
+#利用ANOVA进行随机区组实验的数据分析
+model = smf.ols(formula='gmv ~ C(exp) + C(user_tag)', data=df_data)
+results = model.fit()
+print(results.summary())
+
+df_anova=sm.stats.anova_lm(results, typ=1)
+format_dict={'PR(>F)':'{:,.2%}'.format}
+df_anova.style.format(format_dict)
+
+#不考虑区组的情况下，只是利用ANOVA的方法分析A/B实验
+model = smf.ols(formula='gmv ~ C(exp)', data=df_data)
+results = model.fit()
+df_anova = sm.stats.anova_lm(results, typ=1)
+format_dict={'PR(>F)':'{:,.2%}'.format}
+df_anova.style.format(format_dict)
+```
+
+#### 常见问题
+
+1. 方差分析使用前提，实际上与线性回归类似：
+
+- 自变量相互独立
+
+- 自变量与残差相互独立
+
+- 方差齐性
+
+- 残差正态性
+
+  此外，由于线性回归方程基本都是对连续变量进行建模，所以如果实验的对象是转化率或者其它非正态分布的指标，就需要用到其他模型。
+
+2. 随机区组的个数问题
+
+   区组的优势在于降低方差，让F检验更显著，但对于MSE而言，$MSE = \frac{TSS-SST-SS_{Block}}{df_{residual}}$,只有区组可以在不显著减小$df_{residual}$的同时保证$SS_{Block}$足够大，才能让MSE减少，具体的检验可以参考区组验证阶段的代码。
+
+3. 区组不追求$R^2$，更关注系数和显著性
+
+
+
+### 特殊场景下的实验设计和分析方法
+
+#### 随机饱和度实验
+
+1. 分流实验对象的干扰
+
+   实验单元间存在网络效应（溢出和组间干扰）
+
+   1.1 随机饱和实验
+
+   随机饱和实验的本质是一个分流实验，不同于A/B实验一部随机分流实验组和控制组，在随机饱和实验中，需要经过两步才能随机分流实验组和控制组。在实验中，先将实验对象以簇的形式选取出来，每一簇实验对象要分布均匀，并且簇与簇之间相互独立。之后随机给这些独立相似的簇分配实验饱和度，饱和度范围是【0，1】。最后一句每个簇的实验饱和度，对簇中的实验对象进行分配处理。如下表：
+   
+   
+
+| 簇1                         | 簇2                             | 簇3                             | 簇4                             |
+| --------------------------- | ------------------------------- | ------------------------------- | ------------------------------- |
+| 100个样本，没有样本接受处理 | 100个样本，期望25个样本接受处理 | 100个样本，期望50个样本接受处理 | 100个样本，期望75个样本接受处理 |
+| 饱和度0                     | 饱和度25%                       | 饱和度50%                       | 饱和度75%                       |
+
+首先选取4个分布均匀且独立的簇，之后给簇分配饱和度。由于簇之间相互独立且分布均匀，簇与簇之间的实验对象可以直接进行对比。如果存在实验饱和度为0的簇，则此簇中的实验对象可视为无污染的控制组。如果存在实验饱和度为1的簇，则此簇中的实验对象可视为无污染的实验组。如果同时存在实验饱和度为0和1的簇，那么仅通过比较这两组簇中的实验对象就可得出无偏的处理效应，如：
+$$
+Y_{ic} = \beta_0 + \beta_1*T_{ic} + \phi*X_{ic} + \epsilon_{ic}
+$$
+其中，$Y_{ic}$指第c个簇中第i个单位的实验结果，$T_{ic}$指第c个簇中第i个单位是否接受了处理，$X_{ic}$指第c个簇中第i个单位的协变量，用于减小$\epsilon$的方差。通过拟合上式，$\beta_1$估计了全量处理效应。实际上，除了上式中的每一个实验单元都来自于一个簇，且实验单元是否接受处理由两层随机结果决定意外，其他部分都和随机区组设计一致。但也正是由于实验组和控制组来自独立的簇，在稳定性假设不成立的场景下，上式可以无偏估计出全量处理效果，而随机区组且不行。
+
+如果没有实验饱和组为0和1的簇，也可以通过假设实验饱和度和处理效应的线性关系，运用线性模型对比不同实验饱和度对于实验指标的影响，并通过模型估计处理效应的大小。如下式：
+$$
+Y_{ic} = \beta_0 + \beta_1*T_{ic} +\delta_{1}*(T_{ic}*\pi_c)+ \phi*X_{ic} + \epsilon_{ic}
+$$
+式中$\pi_c$指第c个簇的处理饱和度，$\beta_1$估计了唯一处理效应，即整个簇内只给一个实验对象分配处理的期望处理效果。$\delta_1$解释的是处理饱和度和实验处理的交互影响，因此全量处理效应为$\beta_1+\delta_1$。该模型应用于业务场景不能同时有实验饱和度为0和1的簇，比如某个产品想尽早全量上线，不能有实验饱和度为0的簇；抑或是某个有风险的产品只能采用小流量测试，因此不能有实验饱和度为1的簇。有时我们想估计组件影响，同样需要多个实验饱和度的簇，于是将上式扩展为：
+$$
+ Y_{ic} = \beta_0 + \beta_1*T_{ic}+\beta_2*S_{ic} +\delta_{1}*(T_{ic}*\pi_c)+\delta_2*(S_{ic}*\pi_c)+ \phi*X_{ic} + \epsilon_{ic}
+$$
+$S_{ic}$指第c个簇中第i个单位是否为在处理饱和度不为0的簇里的控制对象。上式中，$\beta_1+\delta_1$估计了全量处理效应的大小，同时$\delta_2$代表实验饱和度与溢出的交互影响效果。$\beta_2$的作用时进行一次线性关系检验，因此处理饱和度为0时，实验组对于控制组的溢出效应也应为0。其场景在于，某电商集团的补贴策略是针对某个特定人群的，这个策略会刺激补贴人群消费，但同时这个人群增加消费可能会对其他人群产生带动作用，如果我们要量化这个带动作用。
+
+假如个体粒度的协变量在模型中的效果不好，可以尝试做簇粒度的模型，如：
+$$
+Y_{c} = \beta_0 + \beta_1*T_{c} + \phi*X_{c} + \epsilon_{c}
+$$
+
+##### **随机饱和度实验的设计流程**
+
+可以抽象为以下3个步骤。
+
+ 
+
+·    确定场景中独立同分布簇的存在形式，例如地区、时间片等。
+
+·    确定实验需要以及可以支持的饱和度集合，并随机给簇分配饱和度。
+
+·    按簇被分配的饱和度随机给簇中的实验对象分配处理。
+
+在随机饱和度实验中，簇的选择非常多，根据不同的商业场景，可以分为地区、时间片，等等。数据分析师在设计实验的时候需要从多个维度进行考量，选出最优的划分方案。在很多商业场景中，地区、日期之间的差异巨大且不好控制。对于同一策略或产品，一线城市、二线城市的用户反应不同，商业区、居民区的用户反应不同，周中、周末的用户反应也不同。因此找到独立且实验对象分布均衡的簇是一件很不容易的事。这里我主要介绍两种分簇的方式：按地区聚类和按时间切分。
+
+1. ##### 地区聚类
+
+地区聚类是基于地理信息进行的。在地理上存在意义的商业场景都可以运用地区聚类，比如外卖、酒店、交通等。以外卖场景为例，我们可以将一个城市切分成大量矩形格子，任意坐标都可以对应到这套坐标系的格子内。
+
+在这样的系统内，每一个外卖订单的发单地点和骑手接单地点的坐标都可以对应到格子内。外卖场景下网络效应的体现之一就是骑手抢单，因为外卖订单的接单时间受其他外卖订单接单时间的影响。假如我们把这些矩形格子聚成几簇，保证每个簇内的订单都是被簇内的骑手接单的，没有骑手跨簇接单，那么这些簇就是相互独立的，可以用于随机饱和度实验。在实际情况下，我们可能无法找到完全独立的簇，但是当跨簇接单的比例下降到一定值的时候，我们可以接受独立性的假设。
+
+另一方面，聚类出的簇与簇之间可能分布得不是很平均，这时我们可以增加分簇的数量，再在簇的基础上随机分组，以此增加订单分布的平均度，但是增加分簇数量的同时，无可避免地会增加跨簇接单率，因此实验设计者需要在分簇平均性和跨簇接单率之间做一个平衡。
+
+2. ##### 时间切分
+
+时间切分是地理聚类之外的另一个选择。还是以外卖业务场景为例，我们可以将时间切分成时间片，例如1个小时、2个小时或者1天。假设时间片与时间片之间是互相独立的。当然，在实际场景中，时间片越小，相关性就越大。通过控制背景变量和在分析时加入协变量可以控制时间片之间的分布平均度。
+
+饱和度池的选择取决于业务需要，一般来说，只要满足饱和度种类大于或等于2，就满足实验的最低需求了。当然多一些饱和度可以更好地估计实验饱和度的溢出效应，但是更多的饱和度会产生更多样本量的需求，这之间的平衡需要实验设计者根据实际情况把握。饱和度池的选择有时也和业务需求相关，比如有些场景业务不允许有0饱和度或者1饱和度的簇。
+
+##### 随机浓度实验评估方法及案例
+
+```python
+import pandas as pd
+import numpy as np
+
+# 4 clusters
+# saturations: 0, 0.25, 0.50, 0.75
+np.random.seed(10)
+
+t1 = np.array([0]*100)
+t2 = np.random.choice([0,1], 100, p=[0.75, 0.25])
+t3 = np.random.choice([0,1], 100, p=[0.5, 0.5])
+t4 = np.random.choice([0,1], 100, p=[0.25, 0.75])
+t = np.concatenate((t1,t2,t3,t4))
+s1 = np.array([0]*100)
+s2 = abs(t2 - 1)
+s3 = abs(t3 - 1)
+s4 = abs(t4 - 1)
+s = np.concatenate((s1,s2,s3,s4))
+pi = np.array([0]*100 + [0.25]*100 + [0.5]*100 + [0.75]*100)
+x1 = 0.5 + np.random.random(400)/2
+error = np.random.random(400)
+intercept = np.array([np.random.randint(1,4)]*400)
+y = intercept + 1.1*t + 1.5*t*pi + s*pi + 0.7*x1 + error
+
+data = pd.DataFrame({"t":t, "s":s, "pi":pi, "x1":x1, "t_pi":t*pi, "s_pi":s*pi, "y":y}).round(4)
+
+#应用溢出效应模型
+import statsmodels.api as sm
+#若s不显著，则说明溢出效应的线性关系是成立的
+x = sm.add_constant(data[["t","s", "t_pi", "s_pi", "x1"]]) 
+model = sm.OLS(y, x)
+results = model.fit()
+print(results.summary())
+
+#则去除s再跑一次回归
+x = sm.add_constant(data[["t", "t_pi", "s_pi", "x1"]]) #, "s"
+model = sm.OLS(y, x)
+results = model.fit()
+print(results.summary())
+```
+
+![image-20231021192117592](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231021192117592.png)
+
+模型中的变量都是显著的，全量处理效应等于t和t_pi的系数相加，即1.0054+1.5710=2.5764。故在处理全量上线在全体对象的时候，y会提高2.5764。在50%处理饱和度下，溢出效应为0.5×0.8841≈0.4421，即控制组的y会提高0.4421。
+
+
+
+#### Switchback实验
+
+**不能使用随机分流策略的情况**
+
+有一些互联网公司在多边市场中扮演着交易中间人的角色，比如外卖平台匹配食客、餐厅和送餐员三方的需求。平台可以通过产品策略优化这个匹配过程，这时就不能仅依靠随机分流的A/B实验了，原因有以下两点。
+
+ 
+
+·    产品策略会对每一个匹配结果产生影响，单独对匹配的一方进行基于用户id的随机分流无法测算其对另外一方的影响以及双方互相影响的叠加效果。
+
+·    匹配类型的产品策略一般都是全局优化的结果，一次匹配结果的变化可能会对同时刻及后续一段时间内其他的匹配产生影响，一般把这个影响当作市场中多个参与方之间的“网络效应”。正是由于网络效应的存在，数据分析师无法在匹配关系的层面进行随机分流。
+
+综上，数据分析师需要在不会对匹配策略产生干扰的情况下切分实验组和对照组，达到实验对比的目的。
+
+##### Switchback实验的基本原理
+
+Switchback实验基于一些不受网络效应干扰的特征对实验样本进行切分，然后把切分的结果按照某种方式分配给实验组和对照组。实验组和对照组会在某一个特征上来回切换，以达到在没有策略时，实验组、对照组的表现在统计上无差异（A/A实验通过），在进行匹配策略的实验时，网络效应产生的干扰也非常小。
+
+在外卖平台的业务场景中，数据分析师可以利用空间和时间进行实验组和对照组的区分，我们称时间维度和空间维度的组合为时空切片，数据分析师需要以时空切片作为分析对象进行实验设计和建模评估。
+
+请注意，时空切片不是随便切分的。首先，网络效应会从以下两方面影响Switchback实验设计和时空切片的可靠性。
+
+1. **空间维度**
+
+在食客下单较多、送餐员送不过来的时候（供不应求），改变策略会影响时空切片的供需结构，如果空间维度划分得不够大，也会影响周边切片的供需结构，延长食客拿到外卖的预估时间，影响平台的业务指标。对于食客下单较少、送餐员较多的供过于求场景同理。
+
+2. **时间维度**
+
+上一个时间段的策略可能会对下一个时间段产生影响。如果时间维度划分得不够大，受策略的影响，上一个场景变成了供不应求的情况，就会延长接下来的时空切片内食客拿到外卖的预估时间。在供过于求的场景同理。
+
+那么，空间和时间维度的切分间隔是越大越好吗？答案自然是否定的。当切片的间隔选取过大时，数据分析师可用的总样本数就会减少。由于业务的限制，实验周期一般不会很长，在较短的周期内，样本之间的差异就会很大。这两点会极大影响Switchback实验的灵敏度和A/A实验的结果，所以我们需要从时空切片的生成方法和实验评估的方法两个方面提升Switchback实验的整体效率。
+
+##### Switchback实验中关于时空切片的聚类方法
+
+1. 利用跨片率衡量网络效应
+
+根据上面对于时间、空间维度网络效应的描述，数据分析师可以将其量化为一个指标，表示食客、餐厅和送餐员处于不同时空切片的比例，即跨片率。无论是从时间维度还是空间维度，如果某种时空切片的切分方法能使得平台所有匹配的跨片率足够低，我们就可以认为每一次匹配结果都是由同样的匹配算法实现的，实验组、对照组之间的网络效应会较小。
+
+2. 利用统计方法进行时间维度的切分
+
+数据分析师可以利用简单穷举的方式，如每15分钟切分一次、每半小时切分一次、每1小时切分一次，解决时间维度的后续影响。利用统计方法，我们可以找到在本次食客和送餐员的匹配中，送餐员是否已经接到上一个时间段匹配订单的概率，这个在时间维度上的跨片率越小越好。
+
+3. 利用谱聚类进行空间维度的切分
+
+如何找到跨片率最小的空间维度的切分方法呢？我们可以把每一次匹配的结果抽象为一个网络图模型。
+
+首先，我们将城市地图按照一定的规则切分为小格子，常见的切分方式是将城市切分为无缝衔接的六边形格子，格子的边长可以依据业务分析的颗粒度来选择，范围是100m～5km。然后，我们把每一次匹配中送餐员、餐厅和食客的位置，离散到每一个格子中，作为图的顶点。最后，我们就可以把匹配的结果作为边反映在图上，包括食客、餐厅、送餐员3个顶点间的连接，每增加一次匹配，相应顶点之间边的权重加1。所以，在遍历了一个完整周期所有的匹配后，我们可以构建一个城市匹配的无向网络图。
+
+我们希望找到跨片率最小的切分方案，就用到了在无向网络图的谱聚类算法。谱聚类算法的原理其实就是找到在切分完成后，每一个子图（时空切片聚类）内部连接稠密、外部连接稀疏的切分方法，自然就对应到了减少跨片率这个业务指标上。
+
+4. 如何评价时空切片的效果
+
+可以利用跨片率这个指标检测网络效应，但跨片率并不是越小越好，最极端的情况就是整个城市是一片，此时跨片率为0，但是可供实验的样本量为1，无法进行实验。
+
+##### Switchback实验的评估方法
+
+接下来我们利用Kaggle上公开的芝加哥出租车数据来模拟Uber、Lyft等网约车平台司机乘客匹配策略的实验场景，通过实例学习Switchback实验的评估方法。
+
+该数据集包含了2013～2019年芝加哥大部分出租车的订单信息，包括起/终点经纬度、订单开始时间等。因为出租车是乘客和司机线下匹配的，所以我们暂时在乘客附近的随机位置放置司机，模拟网约车平台在线匹配司机和乘客的过程。为了简单化处理过程，我们将1天切分为24个小时，作为时间维度的切分方式。
+
+对于空间维度，首先选取2019年10月的订单数据，并按照经纬度0.01度将城市粗略地切分为正方形的格子，将订单的起点离散化。再模拟司机会从周边若干格子按照一定的比例匹配给乘客，效果分别如图9-3、图9-4所示。
+
+
+
+![image-20231023202822704](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231023202822704.png)
+
+​																									图9-3 订单起点
+
+
+
+![image-20231023202837943](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231023202837943.png)
+
+​																						图9-4 司机匹配时的位置
+
+然后，我们利用Python的NetworkX包，生成城市正方形格子的邻接矩阵，再利用Sklearn包的谱聚类算法产生城市空间的聚类，不同的聚类参数对应的订单跨片率结果如图9-5所示，为了不产生过大的网络效应，我们暂时选择聚类数为20、跨片率为12.5%的切分方式。在合并了订单数占比小于1%的长尾切片后，最终合并为7类切片的效果如图9-6所示
+
+![image-20231023203052765](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231023203052765.png)
+
+​																				图9-5 不同聚类数下订单的跨片率
+
+![image-20231023203110364](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231023203110364.png)
+
+​																	图9-6 聚类数为20时的去尾后聚类效果
+
+
+
+首先，假设策略会对订单数产生影响，那么实验评估回归方程就可以写作：订单数=α+β×exp，不过由于时空切片自身的量级差异较大，一方面空间内每一个切片的面积和密度不同，另一方面，时间维度的白天和夜间、周一到周日乘客叫车的行为也差异巨大，所以最终我们加入上述变量控制订单数的方差，回归方程变为：订单数=$\alpha+\beta_1*exp+\overrightarrow{\beta_2}*\overrightarrow{weekday}+\overrightarrow{\beta_3}*\overrightarrow{hour}+\epsilon$，其中weekday和hour代表一周7天和一天24小时的哑变量组合。
+
+之后，将上述利用10月历史数据得到的聚类结果套用在11月的数据上，我们会得到一份时间维度为天的时空切片（24小时×7个空间切片）的数据。我们按照1∶1的比例随机划分实验组和对照组，利用bootstrap方法对于MDE分别为1%、2%……10%的情况下，各模拟100次实验，统计回归方程中exp系数为正的次数作为本次实验设计的power值，可以认为power取值需要大于0.8。通过表9-3所示的模拟结果可知，本次基于时空切片的Switchback实验设计中，在power=0.8的统计假设下，可以测量MDE≥4%的策略实验。
+
+![image-20231023204835263](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231023204835263.png)
+
+Switchback实验设计可以在实验组和对照组互相干扰，不能直接进行A/B实验时，为我们提供一种分析思路。其原理是利用历史数据推测未来的情况，用历史数据的规律将实验样本事先分成一些聚类，再利用这些聚类进行实验设计和分析。换句话说，如果历史上用户间的联系和未来（实验期）用户间的联系相关性非常低，就不能使用本节介绍的方法进行实验分析了。
+
+
+
+
+
+#### 交叉实验
+
+交叉实验是将全集随机切分为若干实验单元，使每一个实验单元先后接受多种策略，在短时间内得到策略效果的一种方法。交叉实验的优势首先是解决了A/B实验同一时间段只能评估一种策略浪费时间成本的问题；其次，交叉实验背后的理论评估方法（方差分析）较A/B实验所需的样本量相对少一些；最后，这种每个实验单元均被相同策略影响的实验方式也可以有效避免实验单元之间个体差异导致统计精度较低的问题。
+
+因此可以说交叉实验是一种重复对不同实验单元组实施实验的设计方案，实验过程中每一个实验单元都会在不同阶段命中不同的策略，其核心思想是每个实验单元都作为自己的对照组进行评估计算。
+
+##### 交叉实验的基本概念
+
+与所有实验的要求类似，交叉实验同样要求样本分流的随机性，即样本随机划分为N组，随机分配策略。
+
+除此之外，由于交叉实验的特殊性，还存在对序列以及时间周期的要求，其中序列表示每一个实验单元命中策略的先后顺序，时间周期表示实验单元策略的生效时段。需要注意的是，每个策略在不同实验单元的生效时段应该一致。
+
+由于实验设计为同一实验单元依次命中不同策略，所以上一个时间周期的策略效果会影响下一个时间周期的策略效果，这种影响在交叉实验中叫作延滞效应，在两个策略之间增加几日空白期可以避免延滞效应，空白期即为消除期。
+
+##### 常见的交叉实验设计矩阵
+
+“序列”与“周期”这两个基本概念的排列组合决定了实验设计矩阵的均匀及平衡特性。
+
+将样本集随机分为两组，分别对两组实验单元在不同时段投放不同策略，使两组实验单元中每例研究对象先后接受两种策略，最后将结果进行对照，这就是2×2交叉矩阵的实验过程，如表9-4所示
+
+![image-20231023210248035](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231023210248035.png)
+
+2×2交叉矩阵中策略A和策略B在实验序列中出现的次数相等，在实验周期内出现的次数也相等，因此2×2交叉矩阵又称为均匀交叉实验设计矩阵。另一个均匀交叉实验设计矩阵的典型代表是数学益智游戏“数独”，数独式的实验设计矩阵也称为拉丁方阵，拉丁方阵是标准的均匀交叉实验。均匀交叉实验的特性表现为每个实验策略在每个周期及每个序列里仅出现一次
+
+![image-20231023210304285](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231023210304285.png)
+
+
+
+拉丁方针除均匀交叉实验设计外还满足平衡实验设计的要求，平衡实验设计的特性为每个策略在其他策略前出现的次数相等，拉丁方阵中每个策略在其他策略前出现的次数均为1。
+
+在平衡实验设计之上，交叉实验设计衍生出了强平衡实验设计的概念，其特性表现与平衡实验设计相似但更严苛，除了策略在其他策略前出现的次数相等之外，还要求策略在其本身之前出现的次数与在其他策略之前出现的次数一致。如表9-6所示，策略ABCD在其他策略包含其本身前面都出现了一次。
+
+![image-20231023210632200](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231023210632200.png)
+
+
+
+既满足均匀特性又满足平衡特性的实验设计矩阵称为强均衡实验设计矩阵，特性为每种策略在序列、周期中出现的次数相等且在其他策略（包含其本身）前出现的次数也相等，如表9-7所示。
+
+![image-20231023210653010](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231023210653010.png)
+
+
+
+##### 交叉实验评估及矩阵误差说明
+
+在交叉实验设计的基本概念中有提到序列一致性、周期一致性、延滞效应等概念，交叉实验设计的评估是以方差分析为背景进行的，存在如下拟合函数。
+$$
+Y_{ijk} = \mu_i + \rho_j +\upsilon_k + \lambda +e_{ijk}
+$$
+其中μ、ρ、ν、λ分别表示观测指标值、周期影响、序列影响以及延滞效应。实验设计中我们认为不同序列、不同周期、不同策略会对实验单元产生不同的效果，且上一策略可能会对一下策略产生影响。若实验设计不满足序列、周期一致性，将会产生误差；不满足平衡设计，将会产生延滞效应。接下来将以ABB|BAA（周期均匀，序列不均匀，强平衡实验）为例，介绍误差的来源计算。ABB|BAA实验设计矩阵形式如表9-8所示。
+
+![image-20231023211726868](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231023211726868.png)
+
+根据拟合函数计算得到对应的观测指标值
+
+![image-20231023211737446](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231023211737446.png)
+
+
+
+分别得出AB策略效果的期望值如下：
+
+![image-20231023213239239](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231023213239239.png)
+
+
+
+通过计算AB差异期望值$E(\widehat{\mu_A}-\widehat{\mu_B})$可得AB策略的效果如下：
+$$
+E(\widehat{\mu_A}-\widehat{\mu_B}) = E(\widehat{\mu_A}) -  E(\widehat{\mu_B}) = \mu_A - \mu_B -\frac{2}{3}\upsilon
+$$
+综上可知，满足周期一致性要求可避免周期误差，满足序列一致性要求可避免序列误差，强平衡实验设计可避免延滞效应的影响。
+
+上述实验设计矩阵中的均匀实验设计、平衡实验设计以及强均衡实验设计均可避免周期及序列误差，其中强均衡实验设计可以避免延滞效应。强平衡实验可以避免延滞效应，但存在序列误差。
+
+以表9-4所示的2×2交叉实验设计矩阵为例，假设washout period设置合理，即$\lambda_A = \lambda_B = \lambda$，指标值如表9-10所示。
+
+![image-20231023213704432](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231023213704432.png)
+
+即，$\mu_{AB} = \mu_A - \mu_B+ 2\rho$，$\mu_{BA} = \mu_B - \mu_A+ 2\rho$，此时可用T检验计算显著性差异。
+
+多于2×2维度的交叉实验设计还须借助ANOVA+GLM的方法评估各因素的影响，延滞效应变量的自由度（维度）应为策略数-1。
+
+##### 交叉实验评估案例
+
+本节案例数据来自Robert O. Kuehl所著Design of Experiments一书中16.1节的案例。研究人员想要评估三种食品对小公牛体内中性洗涤纤维（NDF）水平的影响，实验样本共计12头小公牛，随机分配每两头小公牛为一个序列，共计6个序列，实验设计方案如下，其中A、B、C代表三种不同的食品方案。
+
+1. **实验方案**
+
+·    实验目的：通过实验得到不同食品对小公牛体内中性洗涤纤维的影响水平。
+
+·    实验单元：每两头小公牛为一个序列，子样本为每一头小公牛的数据。
+
+·    实验因子：食品A、食品B、食品C。
+
+·    实验观测指标：中性洗涤纤维。
+
+2. **实验策略**
+
+实验策略如表9-11所示。
+
+![image-20231029200044017](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231029200044017.png)
+
+小公牛实验的矩阵设计方式满足周期一致性（每个周期中A、B、C各出现2次）、序列一致性（每个序列中A、B、C各出现1次）以及平衡性（每个策略在其他策略前各出现2次），即此实验方案可以避免周期误差、序列误差。
+
+将实验数据根据周期、序列、策略、观测指标及子样本等维度处理为如表9-12所示的形式。
+
+![image-20231029200056130](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231029200056130.png)
+
+
+
+代码清单9-2 交叉实验设计数据模拟
+
+```python
+import pandas as pd
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+from statsmodels.stats.multicomp import (pairwise_tukeyhsd,MultiComparison)
+
+import scipy
+print(scipy.__version__)
+
+
+data_lm = ols('NDF ~ C(PER)+C(SEQ)+C(DIET)+C(CARRYOVER)',data=data).fit()
+data_anova = sm.stats.anova_lm(data_lm, typ=2)
+format_dict = {'PR(>F)':'{:,.3%}'.format}
+data_anova.style.format(format_dict)
+```
+
+行上述代码可得序列、周期、饮食对NDF的影响结果，如表9-13所示。
+
+表9-13 小公牛实验方差分析结果表
+
+![00337.jpg](file:///C:/Users/Lenovo/AppData/Local/Temp/msohtmlclip1/01/clip_image002.jpg)
+
+通过上述结果可以看出，食物对小公牛体内中性洗涤纤维水平的影响非常显著。接下来可以采用计算最小均方误差的方式比较不同食品之间的差异是否显著，以获得可以更好地增加小公牛体内中性洗涤纤维的饮食方案，如代码清单9-3所示。
+
+```python
+MultiComp = MultiComparison(data['NDF'],data['DIET'])
+print(MultiComp.tukeyhsd().summary())
+```
+
+![image-20231029200758546](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231029200758546.png)
+
+综上，饮食方案C的小公牛体内中性洗涤纤维水平最高。
+
+交叉实验设计适用于无法切片的全量可逆策略的效果评估，因为同一实验单元先后接受多种策略的实验，所以有效节约了时间成本，减少了样本量需求。同一实验单元先后做策略比较，避免了实验单元个体差异及实验时间先后因素的影响，提高了统计精度。目前统计学上无法较好地衡量延滞效应的影响，需要实验设计人员对策略的影响周期有深入了解，合理制定消除期避免延滞效应带来的影响。同时由于实验单元组需要依次接受策略，策略属性需要可逆转且实验单元样本状态保持稳定。
+
+交叉实验的内部评估原理依然是方差分析，交叉实验设计的创新点在于不同实验设计矩阵可以有效避免误差。
+
+
+
+#### 强约束条件下的实验方法
+
+如果一个强约束条件的商业场景中，实验对象既不能分流又不能轮转，实验该如何进行呢？
+
+##### **1 强约束条件场景**
+
+既不能分流又不能轮转是一个比较极端的场景，例如，想验证一个教学方法对于学生在重要考试上的效果，用分流实验就不是一个很好的选择，因为教育需要对学生保证公平，而教学方法又不能来回轮转。这样的场景下，分流实验和轮转实验都不是一个很好的选择。能不能分流往往是出于对公平、道德甚至是法律角度的考量。分流实验的核心是区别对待实验组和控制组，然而在一些情况下，我们无法区别对待实验对象，即使实验组和控制组是随机划分的。此外，实验能不能轮转往往考虑的是实验在时间上会不会有残留效应，如果上一个时间段实验对实验对象的影响被携带进下一个时间段，实验处理在时间段之间就会受到污染，导致无法运用轮转实验。
+
+##### **2 多基线实验设计的解决思路**
+
+多基线实验设计是一种单案设计。单案设计最大的特点是每一个实验对象既是控制组又是实验组，只不过在时间上是互斥的，即每一个实验对象都会在不同时间段上接受处理或是保持成为控制对象。相比于之前介绍的轮转设计，多基线实验设计只翻转一次控制组和实验组，但包含多个实验对象。
+
+多基线实验设计包含少量实验对象，在一段时间内对实验对象重复测量实验指标，实验前期所有实验对象都是控制组，之后在一些时间点给予实验对象一些处理，并在之后的实验中保持给予处理。处理的时间点对于每个实验对象而言是随机的，并且每个对象可以有不同的时间点。在实验结束后，每个实验对象的处理效果可以通过对比处理前后的实验指标来估计，并且通过假设检验的方式检验处理效果的显著性。图9-7是S.G.Ziegler在“The Effects of Attentional Shift Training on the Execution of Soccer Skills: A Preliminary Investigation”（选自Journal of Applied Behavior Analysis杂志27期551页）一文中展示的足球运动员接受注意力转移训练前后的效果。实验有4名足球运动员参加，每名运动员都会接受24次测试，每次测试满分12分。在实验中，每名运动员在接受训练前先进行几次测试，在测试结果稳定后，于图中竖虚线处依次接受训练，之后继续进行测试。可以看出训练后的得分有肉眼的提高。这是一个典型的多基线实验设计，实验的数据可以后续进行假设检验，具体方法我们会在后文中介绍。
+
+![image-20231029200955491](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231029200955491.png)
+
+
+
+在多基线实验设计中，每个实验对象都会接受处理，也就没有了分流一说。同时在时间上，每个实验对象只是从没有处理到给予处理翻转一次，也就没有了轮转，从而实现了不用分流也不用轮转的实验设计。多基线实验设计一般不需要很多样本，但也要注意不要因为样本量太小而无法达到目标的实验效能，同时实验效能还受重复测度次数和处理时间选择池等其他因素影响。
+
+##### 3 多基线实验的设计流程
+
+多基线实验设计流程主要有以下两步。
+
+·    通过模拟和背景研究，估算实验所需对象数量以及重复测度次数和可以用于接受处理的时间窗口。
+
+·    随机确定每个实验对象接受处理的时间。
+
+多基线实验的效能受多方因素的影响，如实验对象数量、实验重复测度次数和可以用于接受处理的时间窗口时长。这些对于实验效能的影响可以通过模拟来估计，一般来说，样本量越大，实验重复测度次数越多，接受处理的时间窗口越长，实验效能越大。预估实验效能的代码如代码清单9-4所示。
+
+
+
+在代码中，我们定义了一个get_data()函数，其作用是在每次模拟中输出一组贴近预计实验数据的数据。这个函数可以输入一些历史数据以及我们设计的实验重复测度次数、实验对象样本量、接受处理的窗口期、实验对象权重等信息，使得模拟数据尽可能贴近真实。这组数据反映出我们对于处理效果的预期，即实验期的数据加上处理效果。之后我们会用这组数据进行分析以测试是否能得到显著结果，并重复这一过程多次，本例代码中设定为重复100次。最后输出的数字就是实验在目前的参数设定下的实验效能，如果小于目标可以考虑增大样本量、实验重复测度次数或扩大接受处理的时间窗口，如果大于目标可以考虑减小样本量、实验重复测度次数或减小接受处理的时间窗口。
+
+##### 4 多基线实验的评估方法和案例
+
+```python
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+np.random.seed(18)
+
+combined_sample = pd.DataFrame()
+fig, ax = plt.subplots(2,2,figsize=(20,10))
+switch_schedule = []
+c = 0
+for i in range(2):
+    for j in range(2):
+        rep = 20
+        group = [c]*rep
+        c = c + 1
+        n = np.random.randint(5, 15)
+        switch_schedule.append(n)
+        intercept = np.array([np.random.randint(1,4)]*rep)
+        x1 = np.array([0]*n + [1]*(rep-n))
+        x2 = np.random.random(rep).round(4)
+        error = 0.5*np.random.random(rep).round(4)
+        y = intercept + 0.5*x1 + 2*x2 + error # the min is , max is 6
+        
+        switch_schedule.append(n)
+        sample = pd.DataFrame({"x1":x1, "x2":x2, "y":y, "group": group})
+        combined_sample = pd.concat((combined_sample, sample))
+        
+        # 做图
+        ax[i,j].plot(range(1,rep+1), y, marker = 'o')
+        ax[i,j].vlines(x = n, ymin=0, ymax=6, linestyles="dashed")
+        ax[i,j].set_xticks([1,5,10,15,20])
+        ax[i,j].set_ylabel("y")
+```
+
+在模拟数据中，我们有4个实验对象，它们实验结果的权重一致，分别被重复测度了20次，每个实验对象开始接受处理的时间窗口都是[5,14]，接受处理的时间分别为{8,6,9,6}。本次实验要观测的指标是y，处理虚拟变量是x1，并且有一个我们认为存在的协变量x2。在实验开始前，我们预计处理上线后y值会被提高。如图9-8所示，纵轴是y，横轴是重复测量次数，虚线左边是控制期，右边是控制期，即有处理的时期。
+
+![image-20231029201356853](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231029201356853.png)
+
+
+
+从图9-8来看，4个实验对象在给予处理后，实验指标y略有提高但不明显。我们用单边随机检验来检验这组数据处理上线前后y的大小，处理上线后y指标比处理上线前高了0.5740，但是不显著，检验过程如代码清单9-6所示。在代码中，我们先计算了4组加权平均的处理效应，然后随机抽取开始接受处理的时间，并以此计算4组的加权平均的处理效应。重复这个过程99次，再包括最早计算的真实的处理效应，计算真实的处理效应在这100组数据中，能够高于多大占比的处理效应，这个计算的结果就是P值，可以用于判断真实处理效应的显著性。
+
+```python
+fig, ax = plt.subplots(2,2,figsize=(20,10))
+data = []
+c = 0
+for i in range(2):
+    for j in range(2):
+        sample = combined_sample[combined_sample["group"] == c]
+        c += 1
+        x = sm.add_constant(sample[["x2"]]) #"x1", 
+        y = sample[["y"]]
+        model = sm.OLS(y, x)
+        results = model.fit()
+
+        resid = list(results.resid.round(4))
+        data.append(resid)
+
+        # 做图
+        rep = 20
+        ax[i,j].plot(range(1,rep+1), resid, marker = 'o')
+        ax[i,j].vlines(x = n, ymin=np.floor(min(resid)), ymax=np.ceil(max(resid)), linestyles="dashed")
+        ax[i,j].set_xticks([1,5,10,15,20])
+        ax[i,j].set_ylabel("y")
+```
+
+虽然之前计算的结果并不显著，但是这里我们要用到一个小技巧：因为x2是y的协变量，所以可以先用x2解释一部分y的方差，即ŷ=β0+β1·x2。再用回归的残差，也就是y剩余没有被解释的方差做单边随机检验。如图9-9所示，用回归后的剩余残差替换y。可以发现，处理上线后残差的提升很显著，这也是用x2剥离了一部分y的方差的结果。
+
+![image-20231029201450063](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20231029201450063.png)
+
+用图9-9中的残差数据再做单边随机检验，处理上线后的y指标依然比处理上线前高0.5740，但是p值为0.01，实验结果显著。
+
+
+
+
+
+
+
+
+
+
+
+# Finding patterns 
+
+
+
+
+
+
+
+
+
+Data analyse workflow 
+
+Ask
+
+Smart: Specific, Measure, Act-oriented, Relevant, Time-bound
+
+
+
+Prepare
+
+Process
+
+Analyse
+
+Share
+
+Act
+
+
+
+#  方法论
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 技术部分
+
+## Excel部分
+
+### 基本操作
+
+#### 1 数据格式，单元格格式
+
+#### 2. 函数
+
+[Excel函数大全](./Excel函数大全.xls)
+
+##### 汇总统计
+
+sum、count、
+
+##### 文本处理
+
+##### 时间计算
+
+##### 查找与匹配
+
+vlookup、fliter、
+
+#### 3.可视化
+
+各类图表
+
+#### 4. 数据透视表
+
+
+
+## [Python部分](./Python知识手册-V3.2.pdf)
+
+### 爬虫
+
+
+
+### [数据挖掘](./数据挖掘/数据挖掘理论与数学基础/python数据分析与挖掘实战.xmind)
+
+### 模型与选择
+
+#### 基础模型
+
+##### 1.线性回归 Linear Regression：
+
+专门用来预测一个具体的数字，比如房价
+
+最简单的线性回归，英文名：linear regression，用一条线（根据数据有多少列递增）去找适应整个数据集，可以看下面一个图来理解一下，可以调整的参数暂无，实际可以调整的参数一般都不建议调整。
+
+```
+线性回归加上L1正则化，英文名：lasso regression，和最简单的线性回归很像，唯一的不同是加上了L1正则化，这个看起来很复杂，实际上就是为了简化模型，让模型能够在测试中获得更高的正确率。L1的特点是，会剔除掉不相关的变量，比如说预测房价和你的身高没啥关系，如果你在数据里有身高这一项，L1大概率会让身高对于房价的影响降为0。可以调整的参数：
+
+alpha：L1的强度，可以设定为从0到正无穷，数字越大，正则化力度越强，越无关的变量就会越变0
+
+线性回归加上L2正则化，岭回归，英文名：ridge regression，和L1回归很像，唯一的不同是换成了L2正则化，实际上也是为了简化模型，让模型能够在测试中获得更高的正确率。L2的特点是，会降低不相关的变量的影响，但不会成为0，比如说预测房价和你的身高没啥关系，如果你在数据里有身高这一项，L2大概率会让身高对于房价的影响接近0，但不会成为0。可以调整的参数：
+
+alpha：L2的强度，可以设定为从0到正无穷，数字越大，正则化力度越强，越无关的变量就会越变0
+```
+
+
+
+不同线性回归比较，这里可以看到怎么用一条线去适应数据集
+
+##### 2.逻辑回归 Logistic Regression
+
+类似线性回归，但是这个是用来专门做分类的，比如通过各种数据判断一个交易是不是虚假的（虚假或不虚假两类）。可以调整的参数：
+
+```
+penalty：也就是正则化选择，可选择{'l1', 'l2', None, 'elasticnet' }。默认是l2。l1是L1正则化，l2是L2正则化（上面的线性回归部分都有详细的解释），None是没有正则化，elasticnet是L1和L2都有
+
+C：这个是正则化的倒数，默认是1，注意这里和线性回归有区别，这个数字小，正则化越强，越大越弱
+
+l1_ratio：这个不需要加，如果你上面的penality选择的不是elasticnet，如果你加的话，这个数字代表你l1和l2的比重
+```
+
+
+
+##### 3.支持向量机 SVM：Support Vector Machine
+
+可以理解为一个优化的线性回归，可以看一下下面的图来理解一下。可以调整的参数：
+
+```
+C：这个是正则化的倒数，默认是1，注意这里和线性回归有区别，这个数字小，正则化越强，越大越弱
+
+kernel：默认是rbf，可选择的是{‘linear’, ‘poly’, ‘rbf’, ‘sigmoid’}。这个比较进阶，可以理解为一种让模型能够适应更复杂的数据，如果只想线性的话可以考虑选择linear
+```
+
+
+
+![img](https://i0.hdslb.com/bfs/article/e359943d309a7dee2c6c7c5c04a4649c0b85920f.png@842w_384h_progressive.webp)
+
+
+SVM对比线性回归，可以看到SVM给出了最优的线
+
+##### 4.随机森林 random forest
+
+可以把这个理解为另一种分类的办法，下图可以看一下。随机树的优点就是快而且自带正则化效果。可以调整的参数：
+
+```
+n_estimators：你想要多少棵树，默认100，一般而言越大越正则化
+
+criterion：这个比较进阶，可以随便选一个，默认gini。可以选择{“gini”, “entropy”, “log_loss”}
+
+min_samples_split: 这个比较进阶，默认2，最少有多少个数据点才能分出新的叶子，可以按照正确情况来调整
+
+min_samples_leaf: 这个比较进阶，默认1，每一个末端叶子最少有多少个数据点，按照正确情况来调整
+```
+
+随机森林，可以看到随机生成多个树，然后投票
+
+
+
+#### 特征工程
+
+##### 自动特征工程：
+
+[OpenFE](https://github.com/IIIS-Li-Group/OpenFE)
+
+```python
+pip install openfe
+from openfe import OpenFE, transform
+
+ofe = OpenFE()
+features = ofe.fit(data=train_x, label=train_y, n_jobs=n_jobs)  # generate new features
+train_x, test_x = transform(train_x, test_x, features, n_jobs=n_jobs) # transform the train and test data according to generated features.
+```
+
+
+
+参考书籍：
+
+[Feature Engineering for Machine Learning](https://github.com/apachecn/fe4ml-zh)
+
+
+
+
+
+##### **缺失值处理**：
+
+**Numerical Features**
+
+正常分布：mean， skewed分布：median
+
+**Category Features**
+
+Majority Imputation
+
+**Supervised  learning imputation**
+
+Regression/Classification
+
+**XGBoost/LightGBM**
+
+自动处理缺失值，无需对缺失值进行处理
+
+##### 数值特征：
+
+###### 装箱
+
+**固定宽度**：对于固定宽度装箱, 每个 bin 都包含一个特定的数值范围。范围可以是定制设计或自动分割, 它们可以线性缩放或指数缩放。例如, 我们可以将一个人的年龄分组为十年: 0-9 岁归纳到bin 1, 10-19 年归纳到 bin 2 等。要从计数映射到 bin, 只需除以 bin 的宽度并取整部分。
+
+```python
+>>> import numpy as np
+### Generate 20 random integers uniformly between 0 and 99
+>>> small_counts = np.random.randint(0, 100, 20)
+>>> small_counts
+array([30, 64, 49, 26, 69, 23, 56, 7, 69, 67, 87, 14, 67, 33, 88, 77, 75, 47, 44, 93])
+### Map to evenly spaced bins 0-9 by division
+>>> np.floor_divide(small_counts, 10)
+array([3, 6, 4, 2, 6, 2, 5, 0, 6, 6, 8, 1, 6, 3, 8, 7, 7, 4, 4, 9], dtype=int32)
+### An array of counts that span several magnitudes
+>>> large_counts = [296, 8286, 64011, 80, 3, 725, 867, 2215, 7689, 11495, 91897, 44, 28, 7971, 926, 122, 22222]
+### Map to exponential-width bins via the log function
+>>> np.floor(np.log10(large_counts))
+array([ 2., 3., 4., 1., 0., 2., 2., 3., 3., 4., 4., 1., 1., 3., 2., 2., 4.])
+```
+
+**分位数装箱** ：数值差距大，固定宽度很多箱位无数据,
+
+```python
+>>> deciles = biz_df['review_count'].quantile([.1, .2, .3, .4, .5, .6, .7, .8, .9])
+>>> deciles
+0.1 3.0
+0.2 4.0
+0.3 5.0
+0.4 6.0
+0.5 8.0
+0.6 12.0
+0.7 17.0
+0.8 28.0
+0.9 58.0
+Name: review_count, dtype: float64
+### Visualize the deciles on the histogram
+>>> sns.set_style('whitegrid')
+>>> fig, ax = plt.subplots()
+>>> biz_df['review_count'].hist(ax=ax, bins=100)
+>>> for pos in deciles:
+...     handle = plt.axvline(pos, color='r')
+>>> ax.legend([handle], ['deciles'], fontsize=14)
+>>> ax.set_yscale('log')
+>>> ax.set_xscale('log')
+>>> ax.tick_params(labelsize=14)
+>>> ax.set_xlabel('Review Count', fontsize=14)
+>>> ax.set_ylabel('Occurrence', fontsize=14)
+```
+
+```python
+### Continue example Example 2-3 with large_counts
+>>> import pandas as pd
+### Map the counts to quartiles
+>>> pd.qcut(large_counts, 4, labels=False)
+array([1, 2, 3, 0, 0, 1, 1, 2, 2, 3, 3, 0, 0, 2, 1, 0, 3], dtype=int64)
+### Compute the quantiles themselves
+>>> large_counts_series = pd.Series(large_counts)
+>>> large_counts_series.quantile([0.25, 0.5, 0.75])
+0.25 122.0
+0.50 926.0
+0.75 8286.0
+dtype: float64
+```
+
+###### Box-Cox变换
+
+$$
+\tilde{x}= \begin{cases}\frac{x^2-1}{\lambda} & \text { if } \lambda \neq 0, \\ \ln (x) & \text { if } \lambda=0\end{cases}
+$$
+
+只有当数据为正值时, Box-Cox 公式才能工作。对于非正数据, 可以通过加上固定常量来移动数值。当应用 Box-Cox 变换或更一般的功率变换时, 我们必须确定参数 λ 的值。这可能是通过最大似然(找到的λ,使产生的变换信号的高斯似然最大) 或贝叶斯方法。完全介绍 Box-Cox 和一般功率变换的使用超出了本书的范围。感兴趣的读者可以通过 Jack Johnston 和John DiNardo (McGraw Hill) 编写的Econometric Methods 找到更多关于幂转换的信息。幸运的是, Scipy 的数据包包含了一个 Box-Cox 转换的实现, 其中包括查找最佳变换参数。
+
+```python
+>>> from scipy import stats
+
+# Continuing from the previous example, assume biz_df contains
+# the Yelp business reviews data
+# Box-Cox transform assumes that input data is positive.
+# Check the min to make sure.
+>>> biz_df['review_count'].min()
+3
+
+# Setting input parameter lmbda to 0 gives us the log transform (without constant offset)
+>>> rc_log = stats.boxcox(biz_df['review_count'], lmbda=0)
+# By default, the scipy implementation of Box-Cox transform finds the lmbda parameter
+# that will make the output the closest to a normal distribution
+>>> rc_bc, bc_params = stats.boxcox(biz_df['review_count'])
+>>> bc_params
+-0.4106510862321085
+```
+
+
+
+###### 特征缩放或归一化
+
+如果你的模型对输入特征的数值范围敏感, 则特征缩放可能会有所帮助。顾名思义, 特征缩放会更改特征值的数值范围。有时人们也称它为特征规范化。功能缩放通常分别针对单个特征进行。有几种常见的缩放操作, 每个类型都产生不同的特征值分布。
+
+**Rescalling**:模型对输入特征的数值范围敏感，例如KNN, K-means, SVM等, 则特征缩放可能会有所帮助,而且可以防止某个特征影响权重过高，提高梯度下降的速度，可以提升某些模型的效果，
+
+通常做法有：Min-max缩放（$\frac{x-min}{max}$）, 标准化(StandardScaler(x))
+
+**Normalization**：当特征分布是skewed：“symmetry broken",通常做法有：sqrt(x+n), log(x+n), exp(x), power(x), box-cox(x) ,L2 normalization
+
+```python
+>>> import pandas as pd
+>>> import sklearn.preprocessing as preproc
+
+# Load the online news popularity dataset
+>>> df = pd.read_csv('OnlineNewsPopularity.csv', delimiter=', ')
+
+# Look at the original data - the number of words in an article
+>>> df['n_tokens_content'].as_matrix()
+array([ 219., 255., 211., ..., 442., 682., 157.])
+
+# Min-max scaling
+>>> df['minmax'] = preproc.minmax_scale(df[['n_tokens_content']])
+>>> df['minmax'].as_matrix()
+array([ 0.02584376, 0.03009205, 0.02489969, ..., 0.05215955, 
+        0.08048147, 0.01852726])
+
+# Standardization - note that by definition, some outputs will be negative
+>>> df['standardized'] = preproc.StandardScaler().fit_transform(df[['n_tokens_content']])
+>>> df['standardized'].as_matrix()
+array([-0.69521045, -0.61879381, -0.71219192, ..., -0.2218518 ,
+        0.28759248, -0.82681689])
+
+# L2-normalization
+>>> df['l2_normalized'] = preproc.normalize(df[['n_tokens_content']], axis=0)
+>>> df['l2_normalized'].as_matrix()
+array([ 0.00152439, 0.00177498, 0.00146871, ..., 0.00307663,
+        0.0047472 , 0.00109283])
+```
+
+
+
+##### 注意：
+
+**不要中心化稀疏数据**
+
+最小最大缩放和标准化都从原始特征值中减去一个数量。对于最小最大缩放, 移动量是当前特征的所有值中最小的。对于标准化, 移动的量是平均值。如果移动量不是零, 则这两种转换可以将稀疏特征（大部分值为零）的向量转换为一个稠密的向量。这反过来会给分类器带来巨大的计算负担, 取决于它是如何实现的。词袋是一种稀疏表示, 大多数分类库都对稀疏输入进行优化。如果现在的表示形式包含了文档中没有出现的每个单词, 那就太可怕了。请谨慎对稀疏特征执行最小最大缩放和标准化操作。
+
+##### 文本特征
+
+###### 词袋
+
+```python
+>>> import pandas 
+>>> import json 
+>>> from sklearn.feature_extraction.text import CountVectorizer 
+# Load the first 10,000 reviews 
+>>> f = open('data/yelp/v6/yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_review.json') 
+>>> js = [] 
+>>> for i in range(10000): 
+... js.append(json.loads(f.readline())) 
+>>> f.close() 
+>>> review_df = pd.DataFrame(js) 
+# Create feature transformers for unigram, bigram, and trigram. 
+# The default ignores single-character words, which is useful in practice because it trims 
+# uninformative words. But we explicitly include them in this example for illustration purposes. 
+>>> bow_converter = CountVectorizer(token_pattern='(?u)\\b\\w+\\b') 
+>>> bigram_converter = CountVectorizer(ngram_range=(2,2), token_pattern='(?u)\\b\\w+\\b') 
+>>> trigram_converter = CountVectorizer(ngram_range=(3,3), token_pattern='(?u)\\b\\w+\\b') 
+# Fit the transformers and look at vocabulary size 
+>>> bow_converter.fit(review_df['text']) 
+>>> words = bow_converter.get_feature_names() 
+>>> bigram_converter.fit(review_df['text']) 
+>>> bigram = bigram_converter.get_feature_names() 
+>>> trigram_converter.fit(review_df['text']) 
+>>> trigram = trigram_converter.get_feature_names() 
+>>> print (len(words), len(bigram), len(trigram)) 
+26047 346301 847545 
+
+```
+
+![图3-6](https://github.com/apachecn/fe4ml-zh/raw/master/images/chapter3/3-6.PNG)
+
+
+
+###### 分块（Chunking）和词性标注（part-of-Speech Tagging）
+
+分块比 n-gram 要复杂一点，因为它基于词性，基于规则的模型形成了记号序列。
+
+例如，我们可能最感兴趣的是在问题中找到所有名词短语，其中文本的实体，主题最为有趣。 为了找到这个，我们使用词性标记每个作品，然后检查该标记的邻域以查找词性分组或“块”。 定义单词到词类的模型通常是语言特定的。 几种开源 Python 库（如 NLTK，Spacy 和 TextBlob）具有多种语言模型。
+
+```python
+>>> import pandas as pd 
+>>> import json 
+# Load the first 10 reviews 
+>>> f = open('data/yelp/v6/yelp_dataset_challenge_academic_dataset/yelp_academic_dataset_review.json') 
+>>> js = [] 
+>>> for i in range(10): 
+js.append(json.loads(f.readline())) 
+>>> f.close() 
+>>> review_df = pd.DataFrame(js) 
+## First we'll walk through spaCy's functions 
+>>> import spacy 
+# preload the language model 
+>>> nlp = spacy.load('en') 
+# We can create a Pandas Series of spaCy nlp variables 
+>>> doc_df = review_df['text'].apply(nlp) 
+# spaCy gives you fine grained parts of speech using: (.pos_) 
+# and coarse grained parts of speech using: (.tag_) 
+>>> for doc in doc_df[4]: 
+print([doc.text, doc.pos_, doc.tag_]) 
+# spaCy also does some basic noun chunking for us 
+>>> print([chunk for chunk in doc_df[4].noun_chunks]) 
+[a letter, the mail, Dr. Goldberg, Arizona, a new position, June, He, I, a new doctor, NYC, you, a date] 
+##### 
+## We can do the same feature transformations using Textblob 
+>>> from textblob import TextBlob 
+# The default tagger in TextBlob uses the PatternTagger, which is fine for our example. 
+# You can also specify the NLTK tagger, which works better for incomplete sentences. 
+>>> blob_df = review_df['text'].apply(TextBlob) 
+>>> blob_df[4].tags 
+
+```
+
+
+
+##### 类别特征
+
+当某个category feature的值在train与test的数据集中的分布不一致时，需要取两者的交集进行encoding，比如train中有A、B、C，但test中有A、B、D，这时候两边数据都只取A、B，C、D是冗余特征
+
+**Label Encoding**
+
+具有等级的特征，值之间有大小关系
+
+###### One-Hot编码
+
+```python
+import pandas as pd
+from sklearn import linear_model
+df = pd.DataFrame({'City': ['SF', 'SF', 'SF', 'NYC', 'NYC', 'NYC','Seattle', 'Seattle', 'Seattle'],
+				   'Rent': [3999, 4000, 4001, 3499, 3500, 3501, 2499,2500,2501]})
+>>> df['Rent'].mean()
+3333.3333333333335
+
+one_hot_df = pd.get_dummies(df, prefix=['city'])
+>>> one_hot_df
+   Rent  city_NYC  city_SF  city_Seattle
+0  3999         0        1             0
+1  4000         0        1             0
+2  4001         0        1             0
+3  3499         1        0             0
+4  3500         1        0             0
+5  3501         1        0             0
+6  2499         0        0             1
+7  2500         0        0             1
+8  2501         0        0             1
+
+model = linear_model.LinearRegression()
+model.fit(one_hot_df[['city_NYC', 'city_SF', 'city_Seattle']],
+	     one_hot_df[['Rent']])
+>>> model.coef_
+array([[ 166.66666667,  666.66666667, -833.33333333]])
+>>> model.intercept_
+array([ 3333.33333333])
+```
+
+
+
+###### 虚拟编码(dummy_code)
+
+```python
+dummy_df = pd.get_dummies(df, prefix=['city'], drop_first=True)
+
+>>> dummy_df
+   Rent  city_SF  city_Seattle
+0  3999        1             0
+1  4000        1             0
+2  4001        1             0
+3  3499        0             0
+4  3500        0             0
+5  3501        0             0
+6  2499        0             1
+7  2500        0             1
+8  2501        0             1
+
+>>> model.fit(dummy_df[['city_SF', 'city_Seattle']], dummy_df['Rent'])
+LinearRegression(copy_X=True, fit_intercept=True, n_jobs=1, normalize=False)
+>>> model.coef_
+array([  500., -1000.])
+>>> model.intercept_
+3500.0
+```
+
+###### Effect编码
+
+```python
+>>> effect_df = dummy_df.copy()
+>>> effect_df.ix[3:5, ['city_SF', 'city_Seattle']] = -1.0
+>>> effect_df
+   Rent  city_SF  city_Seattle
+0  3999      1.0           0.0
+1  4000      1.0           0.0
+2  4001      1.0           0.0
+3  3499     -1.0          -1.0
+4  3500     -1.0          -1.0
+5  3501     -1.0          -1.0
+6  2499      0.0           1.0
+7  2500      0.0           1.0
+8  2501      0.0           1.0
+>>> model.fit(effect_df[['city_SF', 'city_Seattle']], effect_df['Rent'])
+LinearRegression(copy_X=True, fit_intercept=True, n_jobs=1, normalize=False)
+>>> model.coef_
+array([ 666.66666667, -833.33333333])
+>>> model.intercept_
+3333.3333333333335
+```
+
+**以上总结：**
+
+独热，虚拟和效果编码非常相似。 他们每个人都有优点和缺点。 独热编码是多余的，它允许多个有效模型一样的问题。 非唯一性有时候对解释有问题。该优点是每个特征都明显对应于一个类别。 此外，失踪数据可以编码为全零矢量，输出应该是整体目标变量的平均值。
+
+虚拟编码和效果编码不是多余的。 他们产生独特和可解释的模型。 虚拟编码的缺点是它不能轻易处理缺少数据，因为全零矢量已经映射到参考类别。它还编码每个类别相对于参考类别的影响，其中看起来很奇怪。 效果编码通过使用不同的代码来避免此问题参考类别。 但是，所有-1的矢量都是一个密集的矢量，对于存储和计算来说都很昂贵。 因此，Pandas和Scikit Learn等流行的ML软件包选择了虚拟编码或独热编码，而不是效应编码。当类别数量变得非常多时，所有三种编码技术都会失效大。 需要不同的策略来处理非常大的分类变量。
+
+**处理大量的类别特征**
+
+对于这种类别特征处理的方案有：
+
+1. 对编码不做任何事情。 使用便宜的训练简单模型。 在许多机器上将独热编码引入线性模型（逻辑回归或线性支持向量机）。
+2. 压缩编码，有两种方式 a. 对特征进行哈希--在线性回归中特别常见 b. bin-counting--在线性回归中与树模型都常见
+
+###### 特征哈希
+
+![img](https://github.com/apachecn/fe4ml-zh/raw/master/images/chapter5/5-2.jpg)
+
+
+
+```python
+import pandas as pd
+import json
+
+js = []
+with open('yelp_academic_dataset_review.json') as f:
+	for i in range(10000):
+		js.append(json.loads(f.readline()))
+
+review_df = pd.DataFrame(js)
+
+m = len(review_df.business_id.unique())
+
+>>>m
+4174
+
+In [4]: from sklearn.feature_extraction import FeatureHasher
+   ...: 
+   ...: h = FeatureHasher(n_features=m, input_type='string')
+   ...: 
+   ...: f = h.transform(review_df['business_id'])
+   ...: 
+
+In [5]: review_df['business_id'].unique().tolist()[0:5]
+Out[5]: 
+['9yKzy9PApeiPPOUJEtnvkg',
+ 'ZRJwVLyzEJq1VAihDhYiow',
+ '6oRAC4uyJCsJl1X0WZpVSA',
+ '_1QQZuf4zZOyFCvXc0o6Vg',
+ '6ozycU1RpktNG2-1BroVtw']
+
+
+In [6]: f.toarray()
+Out[6]: 
+array([[ 0.,  0.,  0., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ...,  0.,  0.,  0.],
+       ..., 
+       [ 0.,  0.,  0., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ...,  0.,  0.,  0.],
+       [ 0.,  0.,  0., ...,  0.,  0.,  0.]])
+```
+
+
+
+###### **bin-counting**
+
+bin-counting的想法非常简单：不是使用分类变量作为特征，而是使用目标在该值下的条件概率。 换句话说，不是编码的身份分类值，而是计算该值和该值之间的关联统计量作为我们希望预测的目标。 对于那些熟悉Bayes分类器的人来说，这个统计学应该敲响一下钟，因为它是该类的条件概率假设所有功能都是独立的。
+
+example
+
+|       |                  |                      |                      |                    |                  |                      |                      |
+| ----- | ---------------- | -------------------- | -------------------- | ------------------ | ---------------- | -------------------- | -------------------- |
+| User  | Number of clicks | Number of non-clicks | probability of click | QueryHash,AdDomain | Number of clicks | Number of non-clicks | probability of click |
+| Alice | 5                | 120                  | 0.0400               | 0x598fd4fe,foo.com | 5000             | 30000                | 0.167                |
+| bob   | 20               | 230                  | 0.0800               | 0x50fa3cc0,bar.org | 100,900,0.100    |                      |                      |
+| ...   |                  |                      |                      |                    |                  |                      |                      |
+| joe   | 2                | 3                    | 0.400                | 0x437a45e1,qux.net | 6,18,0.250       |                      |                      |
+
+Bin-counting假定历史数据可用于计算统计。 表5-6包含分类变量每个可能值的汇总历史计数。 根据用户点击任何广告的次数以及未点击的次数，我们可以计算用户“Alice”点击任何广告的概率。 同样，我们可以计算任何查询 - 广告 - 域组合的点击概率。 在训练时，每当我们看到“爱丽丝”时，都使用她的点击概率作为模型的输入特征。 QueryHash-AdDomain对也是如此，例如“0x437a45e1，qux.net”。
+
+假设有10,000个用户。 独热编码会生成一个稀疏矢量长度为10,000，在列中对应于值的单个1当前数据点。 Bin-counting将所有10,000个二进制列编码为一个功能的真实值介于0和1之间。
+
+
+
+##### 非线性特征
+
+###### k 均值特征化
+
+当使用 k 均值作为特征化过程时，数据点可以由它的簇成员（分类变量群组成员的稀疏独热编码）来表示，我们现在来说明。
+
+如果目标变量也是可用的，那么我们可以选择将该信息作为对聚类过程的提示。一种合并目标信息的方法是简单地将目标变量作为 k 均值算法的附加输入特征。由于目标是最小化在所有输入维度上的总欧氏距离，所以聚类过程将试图平衡目标值和原始特征空间中的相似性。可以在聚类算法中对目标值进行缩放以获得更多或更少的关注。目标的较大差异将产生更多关注分类边界的聚类。
+
+聚类算法分析数据的空间分布。因此，k 均值特征化创建了一个压缩的空间索引，该数据可以在下一阶段被馈送到模型中。这是模型堆叠（stacking）的一个例子。
+
+```python
+import numpy as np 
+from sklearn.cluster import KMeans 
+ 
+class KMeansFeaturizer:     
+    """将数字型数据输入k-均值聚类.          
+    在输入数据上运行k-均值并且把每个数据点设定为它的簇id. 如果存在目标变量，则将其缩放并包含为k-均值的输入，以导出服从分类边界以及组相似点的簇。
+    """ 
+ 
+    def __init__(self, k=100, target_scale=5.0, random_state=None):         
+        self.k = k         
+        self.target_scale = target_scale         
+        self.random_state = random_state              
+        
+    def fit(self, X, y=None):         
+    """在输入数据上运行k-均值，并找到中心."""         
+        if y is None:             
+            # 没有目标变量运行k-均值             
+            km_model = KMeans(n_clusters=self.k,n_init=20,random_state=self.random_state)             
+            km_model.fit(X)
+            self.km_model_ = km_model             
+            self.cluster_centers_ = km_model.cluster_centers_             
+            return self 
+ 
+        # 有目标信息，使用合适的缩减并把输入数据输入k-均值 
+        data_with_target = np.hstack((X, y[:,np.newaxis]*self.target_scale)) 
+    
+        # 在数据和目标上简历预训练k-均值模型         
+        km_model_pretrain = KMeans(n_clusters=self.k,n_init=20,random_state=self.random_state)         
+        km_model_pretrain.fit(data_with_target) 
+    
+        #运行k-均值第二次获得簇在原始空间没有目标信息。使用预先训练中发现的质心进行初始化。
+        #通过一个迭代的集群分配和质心重新计算。       
+        km_model = KMeans(n_clusters=self.k,init=km_model_pretrain.cluster_centers_[:,:2],n_init=1,max_iter=1)         
+        km_model.fit(X)                  
+        self.km_model = km_model         
+        self.cluster_centers_ = km_model.cluster_centers_         
+        return self  
+
+    def transform(self, X, y=None):         
+    """为每个输入数据点输出最接近的簇id。"""           
+        clusters = self.km_model.predict(X)         
+        return clusters[:,np.newaxis]          
+        
+    def fit_transform(self, X, y=None):       
+        self.fit(X, y)         
+        return self.transform(X, y) 
+```
+
+```python
+from scipy.spatial import Voronoi, voronoi_plot_2d 
+from sklearn.datasets import make_moons 
+ 
+training_data, training_labels = make_moons(n_samples=2000, noise=0.2) 
+kmf_hint = KMeansFeaturizer(k=100, target_scale=10).fit(training_data, training_labels) 
+kmf_no_hint = KMeansFeaturizer(k=100, target_scale=0).fit(training_data, training_labels) 
+ 
+def kmeans_voronoi_plot(X, y, cluster_centers, ax):     
+    """绘制与数据叠加的k-均值聚类的Voronoi图""" 
+    ax.scatter(X[:, 0], X[:, 1], c=y, cmap='Set1', alpha=0.2)     
+    vor = Voronoi(cluster_centers)     
+    voronoi_plot_2d(vor, ax=ax, show_vertices=False, alpha=0.5) 
+```
+
+让我们测试 k 均值特征分类的有效性。例 7-5 对 k 均值簇特征增强的输入数据应用 Logistic 回归。比较了与使用径向基核的支持向量机（RBF SVM）、K 近邻（KNN）、随机森林（RF）和梯度提升树（GBT）的结果。随机森林和梯度提升树是最流行的非线性分类器，具有最先进的性能。RBF 支持向量机是欧氏空间的一种合理的非线性分类器。KNN 根据其 K 近邻的平均值对数据进行分类。（请参阅“分类器概述”来概述每个分类器。）
+
+分类器的默认输入数据是数据的 2D 坐标。Logistic 回归也给出了簇成员特征（在图 7-7 中标注为“k 均值的 LR”）。作为基线，我们也尝试在二维坐标（标记为“LR”）上进行逻辑回归。
+
+
+
+```python
+from sklearn.linear_model 
+import LogisticRegression 
+from sklearn.svm import SVC 
+from sklearn.neighbors import KNeighborsClassifier 
+from sklearn.ensemble import RandomForestClassifier,GradientBoostingClassifier 
+ 
+#生成与训练数据相同分布的测试数据 
+test_data, test_labels = make_moons(n_samples=2000, noise=0.3) 
+ 
+# 使用k-均值特技器生成簇特征
+training_cluster_features = kmf_hint.transform(training_data) 
+test_cluster_features = kmf_hint.transform(test_data) 
+ 
+# 将新的输入特征和聚类特征整合
+training_with_cluster = scipy.sparse.hstack((training_data, training_cluster_features)) test_with_cluster = scipy.sparse.hstack((test_data, test_cluster_features)) 
+ 
+# 建立分类器 
+lr_cluster = LogisticRegression(random_state=seed).fit(training_with_cluster, training_labels) 
+classifier_names = ['LR','kNN','RBF SVM','Random Forest','Boosted Trees'] 
+classifiers = [LogisticRegression(random_state=seed),KNeighborsClassifier(5),SVC(gamma=2, C=1),RandomForestClassifier(max_depth=5, n_estimators=10, max_features=1),GradientBoostingClassifier(n_estimators=10, learning_rate=1.0, max_depth=5)] 
+for model in classifiers:     
+    model.fit(training_data, training_labels) 
+ 
+# 辅助函数使用ROC评估分类器性能
+def test_roc(model, data, labels): 
+    if hasattr(model, "decision_function"):         
+        predictions = model.decision_function(data)     
+    else:         
+        predictions = model.predict_proba(data)[:,1]     
+        fpr, tpr, _ = sklearn.metrics.roc_curve(labels, predictions)     
+        return fpr, tpr 
+ 
+# 显示结果 
+import matplotlib.pyplot as plt plt.figure() 
+fpr_cluster, tpr_cluster = test_roc(lr_cluster, test_with_cluster, test_labels) plt.plot(fpr_cluster, tpr_cluster, 'r-', label='LR with k-means') 
+ 
+for i, model in enumerate(classifiers):     
+    fpr, tpr = test_roc(model, test_data, test_labels)     plt.plot(fpr, tpr, label=classifier_names[i])      
+    plt.plot([0, 1], [0, 1], 'k--') 
+    plt.legend() 
+```
+
+与独热簇相反，数据点也可以由其逆距离的密集向量表示到每个聚类中心。这比简单的二值化簇保留了更多的信息，但是现在表达是密集的。这里有一个折衷方案。一个热集群成员导致一个非常轻量级的稀疏表示，但是一个可能需要较大的`K`来表示复杂形状的数据。反向距离表示是密集的，这对于建模步骤可能花费更昂贵，但是这可以需要较小的`K`。
+
+稀疏和密集之间的折衷是只保留最接近的簇的`p`的逆距离。但是现在`P`是一个额外的超参数需要去调整。（现在你能理解为什么特征工程需要这么多的步骤吗？），天下没有免费的午餐。
+
+值得注意的是：
+
+k 均值特化对有实数、有界的数字特征是有用的，这些特征构成空间中密集区域的团块。团块可以是任何形状，因为我们可以增加簇的数量来近似它们。（与经典的类别聚类不同，我们不关心真正的簇数；我们只需要覆盖它们。）
+
+k 均值不能处理欧几里得距离没有意义的特征空间，也就是说，奇怪的分布式数字变量或类别变量。如果特征集包含这些变量，那么有几种处理它们的方法：
+
+1. 仅在实值的有界数字特征上应用 k 均值特征。
+2. 定义自定义度量（参见第？章以处理多个数据类型并使用 k 中心点算法。（k 中心点类似于 k 均值，但允许任意距离度量。）
+3. 类别变量可以转换为装箱统计（见“桶计数”），然后使用 K 均值进行特征化。
+
+结合处理分类变量和时间序列的技术，k 均值特化可以自适应的处理经常出现在客户营销和销售分析中的丰富数据。所得到的聚类可以被认为是用户段，这对于下一个建模步骤是非常有用的特征
+
+
+
+
+
+
+
+
+
+
+
+##### 交互特征
+
+```python
+### suppose the x2 is a feature list
+### Create pairwise interaction features, skipping the constant bias term
+>>> X2 = preproc.PolynomialFeatures(include_bias=False).fit_transform(X)
+
+### Create train/test sets for both feature sets
+>>> X1_train, X1_test, X2_train, X2_test, y_train, y_test = train_test_split(X, X2, y, test_size=0.3, random_state=123)
+
+>>> def evaluate_feature(X_train, X_test, y_train, y_test):
+...     '''Fit a linear regression model on the training set and score on the test set'''
+...     model = linear_model.LinearRegression().fit(X_train, y_train)
+...     r_score = model.score(X_test, y_test)
+...     return (model, r_score)
+
+### Train models and compare score on the two feature sets
+>>> (m1, r1) = evaluate_feature(X1_train, X1_test, y_train, y_test)
+>>> (m2, r2) = evaluate_feature(X2_train, X2_test, y_train, y_test)
+>>> print("R-squared score with singleton features: %0.5f" % r1)
+>>> print("R-squared score with pairwise features: %0.10f" % r2)
+R-squared score with singleton features: 0.00924
+R-squared score with pairwise features: 0.0113276523
+```
+
+![image-20230712205231705](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230712205231705.png)
+
+##### 特征选择
+
+[特征选择(Feature Selection)方法汇总](https://zhuanlan.zhihu.com/p/74198735)
+
+[shap: explain the output of any machine learning model](https://github.com/userchen12/shap)
+
+![image-20230712210749248](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230712210749248.png)
+
+粗略地说，特征选择技术分为三类。
+
+###### **Filtering（过滤**）: 
+
+预处理可以删除那些不太可能对模型有用的特征。例如，可以计算每个特征与响应变量之间的相关或相互信息，并筛除相关信息或相互信息低于阈值的特征。第3章讨论了文本特征的过滤技术的例子。过滤比下面的包装（wrapper）技术便宜得多，但是他们没有考虑到正在使用的模型。因此他们可能无法为模型选择正确的特征。最好先保守地进行预过滤，以免在进行模型训练步骤之前无意中消除有用的特征。
+
+example: PCA
+
+```python
+>>> from sklearn import datasets
+>>> from sklearn.decomposition import PCA
+
+# Load the data
+>>> digits_data = datasets.load_digits()
+>>> n = len(digits_data.images)
+
+# Each image is represented as an 8-by-8 array.
+# Flatten this array as input to PCA.
+>>> image_data = digits_data.images.reshape((n, -1))
+>>> image_data.shape(1797, 64)
+
+# Groundtruth label of the number appearing in each image
+>>> labels = digits_data.target
+>>> labels
+array([0, 1, 2, ..., 8, 9, 8])
+# Fit a PCA transformer to the dataset.
+# The number of components is automatically chosen to account for
+# at least 80% of the total variance.
+>>> pca_transformer = PCA(n_components=0.8)
+>>> pca_images = pca_transformer.fit_transform(image_data)
+>>> pca_transformer.explained_variance_ratio_
+array([ 0.14890594, 0.13618771, 0.11794594, 0.08409979, 0.05782415,
+        0.0491691 , 0.04315987, 0.03661373, 0.03353248, 0.03078806
+,
+        0.02372341, 0.02272697, 0.01821863])
+>>> pca_transformer.explained_variance_ratio_[:3].sum()
+0.40303958587675121
+
+# Visualize the results
+>>> import matplotlib.pyplot as plt
+>>> from mpl_toolkits.mplot3d import Axes3D
+>>> %matplotlib notebook
+>>> fig = plt.figure()
+>>> ax = fig.add_subplot(111, projection='3d')
+>>> for i in range(100):
+... ax.scatter(pca_images[i,0], pca_images[i,1], pca_images[i,2],
+... marker=r'![{}](../images/tex-99914b932bd37a50b983c5e7c90ae93b.gif)'.format(labels[i]), s=64)
+
+>>> ax.set_xlabel('Principal component 1')
+>>> ax.set_ylabel('Principal component 2')
+>>> ax.set_zlabel('Principal component 3')
+```
+
+
+
+###### **Wrapper methods（包装方法）**：
+
+这些技术是昂贵的，但它们允许您尝试特征子集，这意味着你不会意外删除自身无法提供信息但在组合使用时非常有用的特征。包装方法将模型视为提供特征子集质量分数的黑盒子。shi一个独立的方法迭代地改进子集。
+
+
+
+###### **Embedded methods（嵌入式方法）**：
+
+嵌入式方法执行特征选择作为模型训练过程的一部分。 例如，决策树固有地执行特征选择，因为它在每个训练步骤选择一个要在其上进行树分裂的特征。另一个例子是L1正则，它可以添加到任何线性模型的训练目标中。L1鼓励模型使用一些特征而不是许多特征。因此它也被称为模型的稀疏约束。嵌入式方法将特征选择作为模型训练过程的一部分。它们不如包装方法那么强大，但也远不如包装方法那么昂贵。与过滤相比，嵌入式方法会选择特定于模型的特征。从这个意义上讲，嵌入式方法在计算费用和结果质量之间取得平衡。
+
+特征选择的全面处理超出了本书的范围。有兴趣的读者可以参考 Isabelle Guyon 和 André Elisseeff 撰写的调查报告“变量和特征选择介绍”（“An Introduction to Variable and Feature Selection”）。
+
+#### 调参
+
+###### 自动调参
+
+[**hyperopt**](https://github.com/hyperopt/hyperopt)
+
+[**Bayesian Optimization**](https://github.com/bayesian-optimization/BayesianOptimization)
+
+
+
+[决策树、随机森林、LightGBM 和 XGBoost 的重要参数以及调整策略](https://zhuanlan.zhihu.com/p/418992334)
+
+###### Xgboost
+
+**调参顺序**
+
+![image-20230713100914013](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230713100914013.png)
+
+![image-20230713100928333](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230713100928333.png)
+
+![image-20230713101041568](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230713101041568.png)
+
+![image-20230713101119373](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230713101119373.png)
+
+#### 模型评价
+
+前提假设：
+真正例（TP）：实际上是正例的数据点被标记为正例
+假正例（FP）：实际上是反例的数据点被标记为正例
+真反例（TN）：实际上是反例的数据点被标记为反例
+假反例（FN）：实际上是正例的数据点被标记为反例
+
+##### 分类评估
+
+###### 二分类
+
+精度-P=TP/(TP+FP)，模型所预测的所有样本中，预测正确的比例
+召回率-R=TP/(TP+FN)，所有正样本中，模型预测为正的比例
+
+**1、F1 score**=2/(1/P+1/R)=2PR/(P+R)
+**2、AP值**：即召回率-精度曲线下的面积
+可视化：
+    1、混淆矩阵
+    2、受试者特征曲线（ROC曲线）
+    3、曲线下面积（AUC）
+
+###### 	多分类
+
+##### 回归评估
+
+​	MAE（Mean Absolute Error）
+​	MSE（Mean Square Error）
+​	RMSE
+​	r2_score（决定系数）
+
+##### 非监督评估
+
+###### 聚类
+
+​		RMS（Root Mean Square）
+​		轮廓系数
+
+###### 关联模型
+
+​		支持度
+​		置信度
+​		提升度
+​			=置信度/支持度
+
+
+
+
+
+
+
+#### Model Pipeline
+
+![image-20230713190240099](C:\Users\Lenovo\AppData\Roaming\Typora\typora-user-images\image-20230713190240099.png)
+
+#### 
+
+
+
+### 各类脚本
+
+#### decrypt document in Python
+
+```python
+import os
+import pyzipper
+import fitz
+import win32com.client
+import pandas as pd
+import msoffcrypto
+
+
+#zip file
+def zip_decrypt(filePath, fileName, password):
+    zf = zipfile.ZipFile(os.path.join(filePath))
+    for i in zf.infolist():
+        if i.flag_bits & 0x01:
+            with pyzipper.AESZipFile(os.path.join(filePath, fileName), 'r') as f:
+                try:
+                    f.pwd = password.encode()
+                    f.extractall(filePath)
+                    return password
+                except Exception as e:
+                    pass
+
+        else:
+            return ''
+
+#execl file
+def excel_decrypt(filePath, fileName, password ):
+    encrypted = open(os.path.join(filePath, fileName), 'rb')
+    file = msoffcrypto.OfficalFile(encrypted)
+    if file.is_encrypted():
+        file.load_key(password= password)
+        with open(os.path.join(filePath, 'temp.xlsx'), 'wb') as f:
+            file.decrypt(f)
+        encrypted.close()
+        return password
+    else:
+        return ''
+
+#word file
+def word_decrypted(filePath, fileName, password):
+    encrypted = open(os.path.join(filePath, fileName), 'rb')
+    file = msoffcrypto.OfficalFile(encrypted)
+    if file.is_encrypted():
+        file.load_key(password=password)
+        with open(os.path.join(filePath, 'temp.docx'), 'wb') as f:
+            file.decrypt(f)
+        encrypted.close()
+        return password
+    else:
+        return ''
+
+#pdf file
+def pdf_decrypted(filePath, fileName, password):
+    pdf = fitz.open(os.path.join(filePath, fileName))
+    if pdf.is_encrypted:
+        pdf.authenticate(password)
+        pdf.save(os.path.join(filePath, 'temp.pdf'))
+        pdf.close()
+        return password
+    else:
+        return ''
+
+#main
+def process(inputPath, pwdPath, pwdColumnName, outputPath):
+    pwdFile = pd.read_excel(pwdPath)
+    pwdList = list(set(pwdFile[pwdColumnName].unique()))
+    pwdList = [str(i) for i in pwdList if str(i) != 'nan']
+    print(pwdList)
+
+    msg_pwd = []
+    error_msg = []
+    file_type = ['pdf', 'zip', 'xls', 'xlsx', 'xlsm', 'doc', 'docx']
+    for file in os.listdir(inputPath):
+        if file.endswith('.msg'):
+            temp = []
+            temp.append(file)
+            file_path = os.path.join(inputPath, file)
+            outlook = win32com.client.Dispatch("Outlook.Application").GetNamespace("MAPI")
+            try:
+                msg = outlook.OpenSharedItem(file_path)
+                att_list = msg.Attachments
+                tarfile_list = [file for file in att_list if file.FileName.rsplit('.', maxsplit=1)[1] in file_type]
+                if len(tarfile_list) >= 1:
+                    att = tarfile_list[0]
+                    for pwd in pwdList:
+                        if att.FileName.rsplit('.', maxsplit=1)[1] == 'pdf':
+                            try:
+                                pwd = pdf_decrypted(outputPath, att.FileName, pwd)
+                                temp.append(pwd)
+                                continue
+                            except Exception as e:
+                                print('pdf failed: %s' % att.FileName)
+                                print(e)
+                        # print(temp)
+                        # msg_pwd.append(temp)
+                        if att.FileName.rsplit('.', maxsplit=1)[1] in ['xls', 'xlsx', 'xlsm']:
+                            try:
+                                pwd = excel_decrypt(outputPath, att.FileName, pwd)
+                                temp.append(pwd)
+                                continue
+                            except Exception as e:
+                                print('excel failed: %s' % att.FileName)
+                                print(e)
+                        # print(temp)
+                        # msg_pwd.append(temp)
+                        if att.FileName.rsplit('.', maxsplit=1)[1] in ['doc', 'docx']:
+                            try:
+                                pwd = word_decrypted(outputPath, att.FileName, pwd)
+                                temp.append(pwd)
+                                continue
+                            except Exception as e:
+                                print('word failed: %s' % att.FileName)
+                                print(e)
+
+
+                        if att.FileName.rsplit('.', maxsplit=1)[1] == 'zip':
+                            try:
+                                pwd = zip_decrypt(outputPath, att.FileName, pwd):
+                                if pwd == None:
+                                    temp.append('')
+                                else:
+                                    temp.append(pwd)
+                                continue
+                            except Exception as e:
+                                print('zip failed: %s' % att.FileName)
+                                print(e)
+                        print(temp)
+                        msg_pwd.append(temp)
+                else:
+                    temp.append('')
+                    msg_pwd.append(temp)
+            except Exception as e:
+                print('%s error: %s' % (file, e))
+                error_msg.append(file)
+    return msg_pwd, error_msg
+
+if __name__ == '__main__':
+    inputPath = ''
+    pwdPath = ''
+    pwd_column = ''
+    msg_pwd, err_msg = process(inputPath, pwdPath, pwd_column)
+    msg_pwd_result = pd.DataFrame(msg_pwd)
+    pwd_list = msg_pwd_result.columns[1:]
+    msg_pwd_result['pwd'] = msg_pwd_result[pwd_list].apply(lambda x:''.join(x.values.astype('str')), axis=1)
+    msg_pwd_result = msg_pwd_result.iloc[:, 0:2]
+    msg_pwd_result.columns = ['msg_name', 'pwd']
+    msg_pwd_result.to_csv(os.path.join(pwdPath.rsplit("\\", maxsplit=1)[0], 'msg_password.csv'), index=False)
+```
+
+Extract term from 
+
+
+
+
+
+## Git
+
+```git
+git init
+
+git add .
+
+git commit ""
+
+git remote add url[ssh]
+
+git pull origin main
+
+git push -u origin main
+
+#if error
+git pull --rebase origin master
+git push -u origin main
+```
+
